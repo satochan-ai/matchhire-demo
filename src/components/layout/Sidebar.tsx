@@ -117,8 +117,13 @@ export function Sidebar() {
       </nav>
 
       {/* フッター */}
-      <div className="border-t border-slate-800 px-5 py-3">
+      <div className="border-t border-slate-800 px-5 py-3 space-y-1">
         <p className="text-xs text-slate-500">v0.1.0 · MatchHire</p>
+        <p className="text-[10px] leading-relaxed text-slate-600">
+          © 2026 MatchHire. All rights reserved.
+          <br />
+          無断転載・無断複製を禁じます。
+        </p>
       </div>
     </aside>
   );
