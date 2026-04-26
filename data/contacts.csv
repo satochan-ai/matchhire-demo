@@ -1,0 +1,10 @@
+id,candidate_id,owner_id,date,channel,opened,replied
+c1,1,o1,2026-04-18,scout,TRUE,TRUE
+c2,1,o2,2026-04-10,scout,TRUE,FALSE
+c3,2,o1,2026-04-12,dm,TRUE,TRUE
+c4,4,o2,2026-04-08,scout,TRUE,TRUE
+c5,4,o2,2026-04-01,scout,FALSE,FALSE
+c6,5,o1,2026-03-28,scout,TRUE,TRUE
+c7,6,o3,2026-03-18,dm,TRUE,TRUE
+c8,8,o3,2026-02-25,scout,TRUE,TRUE
+c9,9,o1,2026-04-11,dm,TRUE,TRUE

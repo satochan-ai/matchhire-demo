@@ -1,0 +1,13 @@
+id,applied_at,candidate_id,job_id,owner_id,channel,validity,invalid_reason,status,document_result,interview_stage,has_offer
+a1,2026-04-20,1,j1,o1,scout,有効,,書類選考,審査中,書類選考中,FALSE
+a2,2026-04-15,2,j2,o1,dm,有効,,面接,通過,2次面接,FALSE
+a3,2026-04-22,3,j3,o2,direct,未判定,,応募受付,未実施,未着手,FALSE
+a4,2026-04-10,4,j4,o2,scout,無効,ポジション不一致,不採用,不通過,終了,FALSE
+a5,2026-04-01,5,j5,o1,scout,有効,,内定,通過,最終面接完了,TRUE
+a6,2026-03-20,6,j2,o3,dm,有効,,承諾,通過,全面接完了,TRUE
+a7,2026-04-05,7,j11,o3,direct,無効,年収条件ミスマッチ,辞退,通過,1次面接後辞退,FALSE
+a8,2026-03-01,8,j6,o3,scout,有効,,入社,通過,全面接完了,TRUE
+a9,2026-04-13,9,j7,o1,dm,未判定,,書類選考,審査中,書類選考中,FALSE
+a10,2026-04-08,10,j8,o2,direct,有効,,面接,通過,1次面接,FALSE
+a11,2026-04-18,1,j9,o1,scout,無効,経験年数不足,不採用,不通過,終了,FALSE
+a12,2026-04-19,2,j10,o2,direct,未判定,,応募受付,未実施,未着手,FALSE

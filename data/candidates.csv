@@ -1,0 +1,11 @@
+id,name,skills,bio,channel,status,valid,updated_at
+1,山田 太郎,"Java,Spring Boot",大手SIerにて5年間Javaバックエンド開発に従事。マイクロサービス設計・運用経験あり。,scout,書類選考,有効,2026-04-24
+2,佐藤 花子,"React,TypeScript",スタートアップでフロントエンドエンジニアとして3年勤務。React / Next.js によるSPA開発が得意。,dm,面接,有効,2026-04-23
+3,鈴木 一郎,"PHP,Laravel",Web制作会社にてLaravelを用いたECサイト開発を2年担当。,direct,応募受付,未判定,2026-04-22
+4,高橋 美咲,"Python,Django",データ分析とWebAPI開発を兼務。PythonとDjangoで社内向けシステムを構築した実績あり。,scout,不採用,無効,2026-04-20
+5,伊藤 健二,"Go,Docker,k8s",クラウドネイティブな開発を5年経験。GoによるAPI開発、Kubernetes運用が専門。,scout,内定,有効,2026-04-19
+6,渡辺 奈々,"Vue.js,Nuxt",受託開発会社にてVue.js / Nuxtを用いたフロントエンド開発を4年担当。,dm,承諾,有効,2026-04-18
+7,中村 翔太,"Ruby,Rails",スタートアップにてRailsフルスタック開発を3年経験。,direct,辞退,無効,2026-04-17
+8,小林 さくら,"iOS,Swift",iOSアプリ開発4年。App Store公開アプリ3本。Swift / SwiftUIが得意。,scout,入社,有効,2026-04-15
+9,加藤 亮,"Android,Kotlin",Androidアプリ開発3年。Kotlin / Jetpack Composeを用いたUI構築が専門。,dm,書類選考,未判定,2026-04-14
+10,吉田 麻衣,"データ分析,Python,SQL",事業会社のデータアナリストとして5年勤務。BIツール導入・分析基盤構築の経験あり。,direct,面接,有効,2026-04-13

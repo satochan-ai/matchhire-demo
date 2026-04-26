@@ -1,0 +1,22 @@
+# Next.js
+.next/
+out/
+build/
+
+# 依存関係
+node_modules/
+
+# 環境変数（機密情報を含む）
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
