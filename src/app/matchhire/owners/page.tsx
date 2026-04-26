@@ -11,7 +11,7 @@ type ChartMode = "count" | "rate";
 
 function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8 animate-pulse">
+    <div className="min-h-screen bg-slate-50 px-6 py-8 animate-pulse">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="h-8 w-40 rounded bg-gray-200" />
         <div className="grid grid-cols-3 gap-4">
@@ -25,7 +25,7 @@ function PageSkeleton() {
 
 function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           <p className="font-semibold mb-1">データの取得に失敗しました</p>
@@ -49,7 +49,7 @@ export default function OwnersPage() {
   if (error)   return <PageError message={error.message} onRetry={refetch} />;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-6">
 
         <div>
@@ -64,7 +64,7 @@ export default function OwnersPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center justify-between flex-wrap gap-3">
             <h2 className="text-base font-semibold text-gray-700">担当者別パフォーマンス比較</h2>
-            <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 gap-0.5">
+            <div className="flex rounded-lg border border-gray-200 bg-slate-50 p-0.5 gap-0.5">
               {(["count", "rate"] as ChartMode[]).map((mode) => (
                 <button
                   key={mode}

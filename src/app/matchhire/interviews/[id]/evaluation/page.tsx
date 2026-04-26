@@ -21,6 +21,11 @@ const INTERVIEW_META: Record<string, InterviewMeta> = {
   "10": { candidateName: "吉田 麻衣", jobTitle: "データアナリスト",               stage: "1次面接" },
 };
 
+/** 静的エクスポート用：INTERVIEW_META の全 ID を事前生成 */
+export function generateStaticParams() {
+  return Object.keys(INTERVIEW_META).map((id) => ({ id }));
+}
+
 export default async function EvaluationPage({
   params,
 }: {

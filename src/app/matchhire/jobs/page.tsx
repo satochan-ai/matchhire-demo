@@ -10,7 +10,7 @@ const DEFAULT_FILTERS: JobFilterState = { query: "", status: "", employmentType:
 
 function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8 animate-pulse">
+    <div className="min-h-screen bg-slate-50 px-6 py-8 animate-pulse">
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="h-8 w-32 rounded bg-gray-200" />
         <div className="grid grid-cols-4 gap-4">
@@ -24,7 +24,7 @@ function PageSkeleton() {
 
 function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           <p className="font-semibold mb-1">データの取得に失敗しました</p>
@@ -60,7 +60,7 @@ export default function JobsPage() {
   if (error)   return <PageError message={error.message} onRetry={refetch} />;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-8">
 
         <div>

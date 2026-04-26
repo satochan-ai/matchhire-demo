@@ -8,6 +8,11 @@ import {
   jobs,
 } from "@/lib/mockData";
 
+/** 静的エクスポート用：mockData の全候補者 ID を事前生成 */
+export function generateStaticParams() {
+  return candidates.map((c) => ({ id: c.id }));
+}
+
 function buildDetailData(id: string): CandidateDetailData | null {
   const candidate = candidates.find((c) => c.id === id);
   if (!candidate) return null;

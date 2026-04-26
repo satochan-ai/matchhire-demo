@@ -73,19 +73,19 @@ export function KpiCards({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-7">
       {items.map((item) => {
         const styles = statusStyles[item.status];
         return (
           <div
             key={item.label}
-            className={`rounded-xl border p-4 ${styles.card}`}
+            className={`rounded-xl border p-3 md:p-4 ${styles.card}`}
           >
             <p className="text-xs font-medium text-gray-500">{item.label}</p>
-            <p className="mt-2 text-2xl font-bold text-gray-800">
+            <p className="mt-1.5 text-xl font-bold text-gray-800 md:mt-2 md:text-2xl">
               {item.isPercent ? `${item.value.toFixed(1)}%` : item.value.toLocaleString()}
             </p>
-            <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${styles.badge}`}>
+            <span className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium md:mt-2 ${styles.badge}`}>
               {styles.label}
             </span>
           </div>

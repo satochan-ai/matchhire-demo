@@ -59,7 +59,7 @@ const actionsByBottleneck: Record<string, string[]> = {
 
 function PageSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-8 animate-pulse">
         <div className="h-8 w-48 rounded bg-gray-200" />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
@@ -78,7 +78,7 @@ function PageSkeleton() {
 
 function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           <p className="font-semibold mb-1">データの取得に失敗しました</p>
@@ -153,19 +153,71 @@ export default function DashboardPage() {
   if (error)   return <PageError message={error.message} onRetry={refetch} />;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-slate-50 px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
 
         {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">ダッシュボード</h1>
-            <p className="mt-1 text-sm text-gray-500">採用ファネル全体のパフォーマンスを確認できます</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-gray-900 md:text-2xl">ダッシュボード</h1>
+            <p className="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-800 md:text-base">
+              スカウト・DMから応募、面接、内定、入社までを一気通貫で可視化する採用プロセス改善ダッシュボードです。
+            </p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+          <div className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm sm:w-auto">
             <DateFilter value={rangeKey} onChange={setRangeKey} baseDate={BASE_DATE} />
           </div>
         </div>
+
+        {/* このダッシュボードで分かること */}
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-1 text-sm font-semibold text-slate-700">このダッシュボードで分かること</h2>
+          <p className="mb-5 text-xs leading-relaxed text-slate-600">
+            スカウト・DMから応募、面接、内定、入社までの流れを見て、採用プロセスの改善ポイントを判断できます。
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              {
+                icon: (
+                  <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                ),
+                title: "採用が順調かどうか",
+                desc:  "送信・開封・返信・有効応募・面接・内定の各KPIを数値とグラフで一覧確認できます。",
+              },
+              {
+                icon: (
+                  <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                ),
+                title: "どこで詰まっているか",
+                desc:  "ファネルの各ステップ間の転換率を比較し、歩留まりが低い箇所を自動で診断します。",
+              },
+              {
+                icon: (
+                  <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
+                title: "今やるべきアクション",
+                desc:  "ボトルネック診断の結果をもとに、今週取り組むべき具体的な改善アクションを提示します。",
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex gap-3 rounded-lg bg-slate-50 p-4">
+                <div className="mt-0.5 shrink-0">{item.icon}</div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">{item.title}</p>
+                  <p className="mt-1 text-xs font-medium leading-relaxed text-slate-700">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* ① KPIサマリー */}
         <section>
@@ -184,17 +236,17 @@ export default function DashboardPage() {
         {/* ⑥ AIインサイト */}
         <InsightPanel insights={insights} />
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:gap-8 lg:grid-cols-2">
           {/* ② ファネル表示 */}
-          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-5 text-base font-semibold text-gray-700">② 採用ファネル</h2>
+          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+            <h2 className="mb-4 text-sm font-semibold text-gray-700 md:mb-5 md:text-base">② 採用ファネル</h2>
             <FunnelChart steps={funnelSteps} />
           </section>
 
           {/* ③④ ボトルネック診断 + アクション提案 */}
-          <div className="space-y-5">
-            <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-gray-700">③ ボトルネック診断</h2>
+          <div className="space-y-4 md:space-y-5">
+            <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+              <h2 className="mb-3 text-sm font-semibold text-gray-700 md:mb-4 md:text-base">③ ボトルネック診断</h2>
               <Bottleneck
                 openRate={openRate}
                 replyRate={replyRate}
@@ -203,8 +255,8 @@ export default function DashboardPage() {
               />
             </section>
 
-            <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-gray-700">④ アクション提案</h2>
+            <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+              <h2 className="mb-3 text-sm font-semibold text-gray-700 md:mb-4 md:text-base">④ アクション提案</h2>
               <ul className="space-y-2">
                 {actions.map((action, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -220,8 +272,8 @@ export default function DashboardPage() {
         </div>
 
         {/* ⑤ チャネル比較 */}
-        <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-base font-semibold text-gray-700">⑤ チャネル比較</h2>
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <h2 className="mb-4 text-sm font-semibold text-gray-700 md:mb-5 md:text-base">⑤ チャネル比較</h2>
           <ChannelChart data={channelData} />
         </section>
 

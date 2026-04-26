@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { RawData } from "@/lib/mockData";
+import { useCsvAutoReload } from "@/hooks/useCsvAutoReload";
 import { fetchCandidates }   from "@/lib/repositories/candidatesRepository";
 import { fetchJobs }         from "@/lib/repositories/jobsRepository";
 import { fetchApplications } from "@/lib/repositories/applicationsRepository";
@@ -85,6 +86,9 @@ export function useRawData(tables: TableName[]): UseRawDataResult {
   }, [tableKey, revision]);
 
   const refetch = useCallback(() => setRevision((r) => r + 1), []);
+
+  // CSV モード時のみ：data/*.csv の変化を検知して自動リフェッチ
+  useCsvAutoReload(refetch);
 
   return { data, loading, error, refetch };
 }

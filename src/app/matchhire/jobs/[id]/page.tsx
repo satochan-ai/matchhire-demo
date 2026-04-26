@@ -5,9 +5,15 @@ import { fetchApplications } from "@/lib/repositories/applicationsRepository";
 import { fetchCandidates }   from "@/lib/repositories/candidatesRepository";
 import { fetchInterviews }   from "@/lib/repositories/interviewsRepository";
 import { JobDetail } from "@/components/jobs/JobDetail";
+import { jobs as mockJobs } from "@/lib/mockData";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+/** 静的エクスポート用：mockData の全求人 ID を事前生成 */
+export function generateStaticParams() {
+  return mockJobs.map((j) => ({ id: j.id }));
 }
 
 export default async function JobDetailPage({ params }: Props) {

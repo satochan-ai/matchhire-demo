@@ -60,7 +60,7 @@ function InsightItem({ insight }: { insight: Insight }) {
 
 export function InsightPanel({ insights }: InsightPanelProps) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
       {/* ヘッダー */}
       <div className="mb-4 flex items-center gap-2">
         <span className="text-lg">🤖</span>

@@ -84,7 +84,7 @@ export default function CandidatesPage() {
   }, [candidates, filters]);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-6">
 
         {/* Header */}

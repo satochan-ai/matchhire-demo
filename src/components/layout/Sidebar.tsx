@@ -64,45 +64,50 @@ function XCircleIcon() {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "ダッシュボード", href: "/matchhire/dashboard",   icon: <DashboardIcon /> },
-  { label: "候補者管理",     href: "/matchhire/candidates",  icon: <UsersIcon /> },
+  { label: "ダッシュボード", href: "/matchhire/dashboard",    icon: <DashboardIcon /> },
+  { label: "候補者管理",     href: "/matchhire/candidates",   icon: <UsersIcon /> },
   { label: "応募管理",       href: "/matchhire/applications", icon: <FileIcon /> },
-  { label: "担当者分析",     href: "/matchhire/owners",      icon: <ChartIcon /> },
-  { label: "求人管理",       href: "/matchhire/jobs",        icon: <BriefcaseIcon /> },
-  { label: "NG理由分析",     href: "/matchhire/ng-reasons",  icon: <XCircleIcon /> },
+  { label: "担当者分析",     href: "/matchhire/owners",       icon: <ChartIcon /> },
+  { label: "求人管理",       href: "/matchhire/jobs",         icon: <BriefcaseIcon /> },
+  { label: "NG理由分析",     href: "/matchhire/ng-reasons",   icon: <XCircleIcon /> },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col border-r border-gray-200 bg-white">
+    <aside className="hidden md:flex h-full w-56 shrink-0 flex-col bg-slate-900">
       {/* ロゴ */}
-      <div className="flex h-14 items-center border-b border-gray-200 px-5">
-        <span className="text-base font-bold text-blue-600 tracking-tight">MatchHire</span>
+      <div className="border-b border-slate-800 px-5 py-4">
+        <div className="mb-1 flex items-center gap-0">
+          <span className="text-xl font-bold tracking-wide text-white">Match</span>
+          <span className="text-xl font-bold tracking-wide text-blue-400">Hire</span>
+        </div>
+        <p className="mt-2 text-sm font-medium leading-relaxed text-slate-200 tracking-wide">採用ファネル分析ツール</p>
       </div>
 
       {/* ナビ */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-0.5">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-slate-800 text-white"
+                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
                   }`}
                 >
-                  <span className={isActive ? "text-blue-600" : "text-gray-400"}>
+                  <span className={isActive ? "text-blue-400" : "text-slate-500"}>
                     {item.icon}
                   </span>
                   {item.label}
                   {isActive && (
-                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
                   )}
                 </Link>
               </li>
@@ -112,8 +117,8 @@ export function Sidebar() {
       </nav>
 
       {/* フッター */}
-      <div className="border-t border-gray-200 px-5 py-3">
-        <p className="text-xs text-gray-400">v0.1.0 · mock mode</p>
+      <div className="border-t border-slate-800 px-5 py-3">
+        <p className="text-xs text-slate-500">v0.1.0 · MatchHire</p>
       </div>
     </aside>
   );
