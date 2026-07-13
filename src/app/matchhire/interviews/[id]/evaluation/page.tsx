@@ -1,29 +1,17 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { EvaluationForm } from "@/components/evaluations/EvaluationForm";
+import { NotFoundState } from "@/components/common/NotFoundState";
+import { fetchInterviews } from "@/lib/repositories/interviewsRepository";
+import { fetchApplications } from "@/lib/repositories/applicationsRepository";
+import { fetchCandidates } from "@/lib/repositories/candidatesRepository";
+import { fetchJobs } from "@/lib/repositories/jobsRepository";
+import { fetchEvaluations, selectEvaluationForInterview } from "@/lib/repositories/evaluationsRepository";
+import { warnReferentialIntegrity } from "@/lib/dataIntegrity";
+import { interviews as mockInterviews } from "@/lib/mockData";
 
-interface InterviewMeta {
-  candidateName: string;
-  jobTitle: string;
-  stage: string;
-}
-
-const INTERVIEW_META: Record<string, InterviewMeta> = {
-  "1": { candidateName: "山田 太郎",  jobTitle: "バックエンドエンジニア（Java）", stage: "1次面接" },
-  "2": { candidateName: "佐藤 花子",  jobTitle: "フロントエンドエンジニア",        stage: "2次面接" },
-  "3": { candidateName: "鈴木 一郎",  jobTitle: "Webエンジニア（PHP）",            stage: "1次面接" },
-  "4": { candidateName: "高橋 美咲",  jobTitle: "バックエンドエンジニア（Python）", stage: "1次面接" },
-  "5": { candidateName: "伊藤 健二",  jobTitle: "インフラエンジニア（Go/k8s）",    stage: "最終面接" },
-  "6": { candidateName: "渡辺 奈々",  jobTitle: "フロントエンドエンジニア",        stage: "最終面接" },
-  "7": { candidateName: "中村 翔太",  jobTitle: "Webエンジニア（Ruby）",           stage: "1次面接" },
-  "8": { candidateName: "小林 さくら", jobTitle: "iOSエンジニア",                 stage: "最終面接" },
-  "9": { candidateName: "加藤 亮",    jobTitle: "Androidエンジニア",              stage: "1次面接" },
-  "10": { candidateName: "吉田 麻衣", jobTitle: "データアナリスト",               stage: "1次面接" },
-};
-
-/** 静的エクスポート用：INTERVIEW_META の全 ID を事前生成 */
+/** 静的エクスポート用：mockData の全面接 ID を事前生成 */
 export function generateStaticParams() {
-  return Object.keys(INTERVIEW_META).map((id) => ({ id }));
+  return mockInterviews.map((i) => ({ id: i.id }));
 }
 
 export default async function EvaluationPage({
@@ -32,8 +20,40 @@ export default async function EvaluationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const meta = INTERVIEW_META[id];
-  if (!meta) notFound();
+
+  const [interviews, applications, candidates, jobs, evaluations] = await Promise.all([
+    fetchInterviews(),
+    fetchApplications(),
+    fetchCandidates(),
+    fetchJobs(),
+    fetchEvaluations(),
+  ]);
+
+  // データソース（mock/csv/sheets）を問わず、取得済みテーブルの参照整合性を
+  // 開発環境でのみ検証する（重複評価の検知もここに含まれる）。
+  warnReferentialIntegrity({ candidates, applications, interviews, evaluations, jobs });
+
+  const interview = interviews.find((i) => i.id === id);
+
+  if (!interview) {
+    return (
+      <NotFoundState
+        title="面接情報が見つかりません"
+        message={`ID「${id}」に該当する面接は存在しません。削除されたか、URLが正しくない可能性があります。`}
+        backHref="/matchhire/candidates"
+        backLabel="候補者一覧に戻る"
+      />
+    );
+  }
+
+  const application = applications.find((a) => a.id === interview.applicationId);
+  const candidate = candidates.find((c) => c.id === interview.candidateId);
+  const job = application ? jobs.find((j) => j.id === application.jobId) : undefined;
+  const existingEvaluation = selectEvaluationForInterview(evaluations, interview.id);
+
+  const candidateName = candidate?.name ?? "不明な候補者";
+  const jobTitle = job?.title ?? "不明な求人";
+  const stage = application?.interviewStage || "面接";
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-8">
@@ -51,12 +71,16 @@ export default async function EvaluationPage({
             候補者一覧
           </Link>
           <span className="text-gray-300">/</span>
-          <Link
-            href={`/matchhire/candidates/${id}`}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            {meta.candidateName}
-          </Link>
+          {candidate ? (
+            <Link
+              href={`/matchhire/candidates/${candidate.id}`}
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {candidateName}
+            </Link>
+          ) : (
+            <span className="text-sm text-gray-400">{candidateName}</span>
+          )}
           <span className="text-gray-300">/</span>
           <h1 className="text-xl font-bold text-gray-900">面接評価入力</h1>
         </div>
@@ -64,17 +88,34 @@ export default async function EvaluationPage({
         {/* サブタイトル */}
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
-            <span><span className="font-medium text-gray-400">候補者：</span>{meta.candidateName}</span>
-            <span><span className="font-medium text-gray-400">求人：</span>{meta.jobTitle}</span>
-            <span><span className="font-medium text-gray-400">ステージ：</span>{meta.stage}</span>
+            <span><span className="font-medium text-gray-400">候補者：</span>{candidateName}</span>
+            <span><span className="font-medium text-gray-400">求人：</span>{jobTitle}</span>
+            <span><span className="font-medium text-gray-400">ステージ：</span>{stage}</span>
+            <span><span className="font-medium text-gray-400">面接日：</span>{interview.date}</span>
+            <span><span className="font-medium text-gray-400">面接官：</span>{interview.interviewer}</span>
           </div>
         </div>
 
         {/* フォーム本体 */}
         <EvaluationForm
-          candidateName={meta.candidateName}
-          jobTitle={meta.jobTitle}
-          stage={meta.stage}
+          candidateName={candidateName}
+          jobTitle={jobTitle}
+          stage={stage}
+          initialValues={
+            existingEvaluation
+              ? {
+                  technicalScore: existingEvaluation.technicalScore,
+                  communicationScore: existingEvaluation.communicationScore,
+                  alignmentScore: existingEvaluation.alignmentScore,
+                  overallGrade: existingEvaluation.overallGrade,
+                  result: existingEvaluation.result,
+                  ngReason: existingEvaluation.ngReason,
+                  concerns: existingEvaluation.concerns,
+                  comment: existingEvaluation.comment,
+                  nextAction: existingEvaluation.nextAction,
+                }
+              : undefined
+          }
         />
 
       </div>

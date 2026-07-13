@@ -1,54 +1,80 @@
-import { notFound } from "next/navigation";
 import { CandidateDetail, type CandidateDetailData } from "@/components/candidates/CandidateDetail";
-import {
-  candidates,
-  applications,
-  interviews,
-  contacts,
-  jobs,
-} from "@/lib/mockData";
+import { NotFoundState } from "@/components/common/NotFoundState";
+import { fetchCandidates } from "@/lib/repositories/candidatesRepository";
+import { fetchApplications } from "@/lib/repositories/applicationsRepository";
+import { fetchInterviews } from "@/lib/repositories/interviewsRepository";
+import { fetchContacts } from "@/lib/repositories/contactsRepository";
+import { fetchJobs } from "@/lib/repositories/jobsRepository";
+import { candidates as mockCandidates } from "@/lib/mockData";
 
 /** 静的エクスポート用：mockData の全候補者 ID を事前生成 */
 export function generateStaticParams() {
-  return candidates.map((c) => ({ id: c.id }));
+  return mockCandidates.map((c) => ({ id: c.id }));
 }
 
-function buildDetailData(id: string): CandidateDetailData | null {
-  const candidate = candidates.find((c) => c.id === id);
-  if (!candidate) return null;
+export default async function CandidateDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-  // 最初の応募を選考情報として使用（複数ある場合は最新）
+  // データソース（mock / csv / sheets）を意識せず、Repository 経由で取得する
+  const [candidates, applications, interviews, contacts, jobs] = await Promise.all([
+    fetchCandidates(),
+    fetchApplications(),
+    fetchInterviews(),
+    fetchContacts(),
+    fetchJobs(),
+  ]);
+
+  const candidate = candidates.find((c) => c.id === id);
+
+  if (!candidate) {
+    return (
+      <NotFoundState
+        title="候補者が見つかりません"
+        message={`ID「${id}」に該当する候補者は存在しません。削除されたか、URLが正しくない可能性があります。`}
+        backHref="/matchhire/candidates"
+        backLabel="候補者一覧に戻る"
+      />
+    );
+  }
+
+  // 最新の応募を選考情報として使用
   const candidateApps = applications
     .filter((a) => a.candidateId === id)
     .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt));
   const primaryApp = candidateApps[0];
+  const primaryJob = primaryApp ? jobs.find((j) => j.id === primaryApp.jobId) : undefined;
 
-  const application = primaryApp
+  const application: CandidateDetailData["application"] = primaryApp
     ? {
         appliedAt:      primaryApp.appliedAt,
+        jobTitle:       primaryJob?.title ?? "不明な求人",
         documentResult: primaryApp.documentResult,
         interviewStage: primaryApp.interviewStage,
         hasOffer:       primaryApp.hasOffer,
       }
     : {
         appliedAt:      "—",
+        jobTitle:       "—",
         documentResult: "未実施" as const,
         interviewStage: "未着手",
         hasOffer:       false,
       };
 
-  // 面接履歴：この候補者に関連する interviews
   const candidateInterviews = interviews
     .filter((i) => i.candidateId === id)
     .sort((a, b) => b.date.localeCompare(a.date))
     .map((i) => ({
+      id:          i.id,
       date:        i.date,
       interviewer: i.interviewer,
       result:      i.result,
       comment:     i.comment,
     }));
 
-  // 接触履歴
   const candidateContacts = contacts
     .filter((c) => c.candidateId === id)
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -59,7 +85,7 @@ function buildDetailData(id: string): CandidateDetailData | null {
       replied: c.replied,
     }));
 
-  return {
+  const data: CandidateDetailData = {
     basic: {
       name:    candidate.name,
       skills:  candidate.skills,
@@ -72,18 +98,6 @@ function buildDetailData(id: string): CandidateDetailData | null {
     interviews: candidateInterviews,
     contacts:   candidateContacts,
   };
-}
 
-export default async function CandidateDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const data = buildDetailData(id);
-  if (!data) notFound();
   return <CandidateDetail data={data} />;
 }
-
-// 未使用変数を防ぐためのダミー参照（jobs は将来の求人表示で使用予定）
-void jobs;

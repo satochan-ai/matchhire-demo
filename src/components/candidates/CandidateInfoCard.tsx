@@ -32,6 +32,7 @@ export interface BasicInfo {
 
 export interface ApplicationInfo {
   appliedAt: string;
+  jobTitle: string;
   documentResult: "通過" | "不通過" | "審査中" | "未実施";
   interviewStage: string;
   hasOffer: boolean;
@@ -44,6 +45,8 @@ interface CandidateInfoCardProps {
   currentStatus?: CandidateStatus;
   /** ステータス更新コールバック */
   onStatusUpdate?: (newStatus: CandidateStatus) => void;
+  /** true の場合、ステータス更新がデモ表示であることを明示する */
+  demoMode?: boolean;
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -60,6 +63,7 @@ export function CandidateInfoCard({
   application,
   currentStatus,
   onStatusUpdate,
+  demoMode = false,
 }: CandidateInfoCardProps) {
   const displayStatus = currentStatus ?? basic.status;
   return (
@@ -96,6 +100,7 @@ export function CandidateInfoCard({
           <CandidateStatusUpdate
             currentStatus={displayStatus}
             onUpdate={onStatusUpdate}
+            demoMode={demoMode}
           />
         )}
       </div>
@@ -103,6 +108,9 @@ export function CandidateInfoCard({
       {/* ② 応募・選考情報 */}
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">② 応募・選考情報</h2>
+        <Row label="応募求人">
+          <span className="font-medium text-gray-800">{application.jobTitle}</span>
+        </Row>
         <Row label="応募日">
           <span>{application.appliedAt}</span>
         </Row>

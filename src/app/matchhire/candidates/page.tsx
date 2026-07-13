@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { CandidateTable } from "@/components/candidates/CandidateTable";
 import { CandidateFilters, type FilterState } from "@/components/candidates/CandidateFilters";
 import { useCandidates } from "@/hooks/useCandidates";
+import { LoadingState } from "@/components/common/LoadingState";
+import { ErrorState } from "@/components/common/ErrorState";
 import type { Candidate } from "@/lib/mockData";
 
 // CandidateTable が参照する型を re-export（後方互換）
@@ -15,50 +17,6 @@ const DEFAULT_FILTERS: FilterState = {
   status: "all",
   valid: "all",
 };
-
-// ─────────────────────────────────────────
-// ローディングスケルトン
-// ─────────────────────────────────────────
-
-function LoadingSkeleton() {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="animate-pulse divide-y divide-gray-100">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 px-6 py-4">
-            <div className="h-4 w-32 rounded bg-gray-200" />
-            <div className="h-4 w-20 rounded bg-gray-200" />
-            <div className="ml-auto h-4 w-16 rounded bg-gray-200" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────
-// エラーバナー
-// ─────────────────────────────────────────
-
-interface ErrorBannerProps {
-  message: string;
-  onRetry: () => void;
-}
-
-function ErrorBanner({ message, onRetry }: ErrorBannerProps) {
-  return (
-    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-      <p className="font-semibold mb-1">データの取得に失敗しました</p>
-      <p className="text-red-500 mb-4 break-all">{message}</p>
-      <button
-        onClick={onRetry}
-        className="rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700 transition-colors"
-      >
-        再試行する
-      </button>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────
 // ページ本体
@@ -114,9 +72,9 @@ export default function CandidatesPage() {
 
         {/* ローディング / エラー / テーブル */}
         {loading ? (
-          <LoadingSkeleton />
+          <LoadingState variant="table" />
         ) : error ? (
-          <ErrorBanner message={error.message} onRetry={refetch} />
+          <ErrorState message={error.message} onRetry={refetch} fullPage={false} />
         ) : (
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
             <CandidateTable candidates={filtered} />

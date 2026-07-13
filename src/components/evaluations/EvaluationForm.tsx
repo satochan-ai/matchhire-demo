@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { EvaluationPreview } from "@/components/evaluations/EvaluationPreview";
+import { NG_REASONS, type NgReason } from "@/lib/mockData";
 
 export interface EvaluationFormValues {
   technicalScore: number | null;
@@ -9,17 +10,19 @@ export interface EvaluationFormValues {
   alignmentScore: number | null;
   overallGrade: "A" | "B" | "C" | "D" | null;
   result: "通過" | "不採用" | "保留" | null;
+  ngReason: NgReason | null;
   concerns: string;
   comment: string;
   nextAction: string;
 }
 
-const INITIAL_VALUES: EvaluationFormValues = {
+const EMPTY_VALUES: EvaluationFormValues = {
   technicalScore: null,
   communicationScore: null,
   alignmentScore: null,
   overallGrade: null,
   result: null,
+  ngReason: null,
   concerns: "",
   comment: "",
   nextAction: "",
@@ -29,6 +32,10 @@ interface EvaluationFormProps {
   candidateName: string;
   jobTitle: string;
   stage: string;
+  /** 既存の評価データがあれば初期値として使用する */
+  initialValues?: Partial<EvaluationFormValues>;
+  /** true の場合、保存機能が未実装であることを明示する（永続化しない） */
+  saveDisabled?: boolean;
 }
 
 // --- スコア選択（1〜5ラジオ）---
@@ -129,8 +136,8 @@ function TextArea({
   );
 }
 
-export function EvaluationForm({ candidateName, jobTitle, stage }: EvaluationFormProps) {
-  const [values, setValues] = useState<EvaluationFormValues>(INITIAL_VALUES);
+export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, saveDisabled = true }: EvaluationFormProps) {
+  const [values, setValues] = useState<EvaluationFormValues>({ ...EMPTY_VALUES, ...initialValues });
   const [saved, setSaved] = useState(false);
 
   const set = <K extends keyof EvaluationFormValues>(key: K, val: EvaluationFormValues[K]) => {
@@ -139,6 +146,7 @@ export function EvaluationForm({ candidateName, jobTitle, stage }: EvaluationFor
   };
 
   const handleSave = () => {
+    // 永続化先（CSV書き込み / DB）が未実装のため、画面表示のみを更新する。
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -155,6 +163,9 @@ export function EvaluationForm({ candidateName, jobTitle, stage }: EvaluationFor
     不採用: "border-red-500 bg-red-500 text-white",
     保留: "border-yellow-500 bg-yellow-500 text-white",
   };
+
+  const ngReasonColors: Record<string, string> = {};
+  NG_REASONS.forEach((r) => { ngReasonColors[r] = "border-red-400 bg-red-400 text-white"; });
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -191,9 +202,21 @@ export function EvaluationForm({ candidateName, jobTitle, stage }: EvaluationFor
               label="結果"
               options={["通過", "不採用", "保留"] as const}
               value={values.result}
-              onChange={(v) => set("result", v)}
+              onChange={(v) => {
+                set("result", v);
+                if (v !== "不採用") set("ngReason", null);
+              }}
               colorMap={resultColors}
             />
+            {values.result === "不採用" && (
+              <ButtonGroup
+                label="NG理由"
+                options={NG_REASONS}
+                value={values.ngReason}
+                onChange={(v) => set("ngReason", v)}
+                colorMap={ngReasonColors}
+              />
+            )}
           </div>
         </div>
 
@@ -225,22 +248,29 @@ export function EvaluationForm({ candidateName, jobTitle, stage }: EvaluationFor
         </div>
 
         {/* 保存ボタン */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleSave}
-            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:scale-95 transition-all"
-          >
-            保存する
-          </button>
-          {saved && (
-            <span className="flex items-center gap-1.5 text-sm font-medium text-green-600">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              保存しました
-            </span>
+        <div className="space-y-2">
+          {saveDisabled && (
+            <p className="text-xs font-medium text-amber-600">
+              ※ 保存機能は準備中です。この画面での入力内容は保存されません（デモ表示）。
+            </p>
           )}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:scale-95 transition-all"
+            >
+              {saveDisabled ? "デモ保存" : "保存する"}
+            </button>
+            {saved && (
+              <span className="flex items-center gap-1.5 text-sm font-medium text-green-600">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {saveDisabled ? "画面表示のみ更新しました（未保存）" : "保存しました"}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

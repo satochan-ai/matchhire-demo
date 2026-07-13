@@ -61,6 +61,17 @@ export function EvaluationPreview({
         <PreviewRow label="結果">
           <EvaluationResultBadge result={values.result} />
         </PreviewRow>
+        {values.result === "不採用" && (
+          <PreviewRow label="NG理由">
+            {values.ngReason ? (
+              <span className="inline-block rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600">
+                {values.ngReason}
+              </span>
+            ) : (
+              <span className="text-gray-300">未入力</span>
+            )}
+          </PreviewRow>
+        )}
       </div>
 
       {/* コメントプレビュー */}

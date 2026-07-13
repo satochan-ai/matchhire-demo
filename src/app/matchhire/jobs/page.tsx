@@ -5,36 +5,10 @@ import { computeJobMetrics } from "@/lib/mockData";
 import { JobFilters, type JobFilterState } from "@/components/jobs/JobFilters";
 import { JobTable } from "@/components/jobs/JobTable";
 import { useRawData } from "@/hooks/useRawData";
+import { LoadingState } from "@/components/common/LoadingState";
+import { ErrorState } from "@/components/common/ErrorState";
 
 const DEFAULT_FILTERS: JobFilterState = { query: "", status: "", employmentType: "" };
-
-function PageSkeleton() {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8 animate-pulse">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <div className="h-8 w-32 rounded bg-gray-200" />
-        <div className="grid grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-200" />)}
-        </div>
-        <div className="h-80 rounded-xl bg-gray-200" />
-      </div>
-    </div>
-  );
-}
-
-function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-          <p className="font-semibold mb-1">データの取得に失敗しました</p>
-          <p className="text-red-500 mb-4 break-all">{message}</p>
-          <button onClick={onRetry} className="rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700">再試行する</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function JobsPage() {
   const { data, loading, error, refetch } = useRawData(["jobs", "applications", "interviews"]);
@@ -56,8 +30,8 @@ export default function JobsPage() {
   const pausedCount = allJobs.filter((j) => j.status === "停止").length;
   const filledCount = allJobs.filter((j) => j.status === "充足").length;
 
-  if (loading) return <PageSkeleton />;
-  if (error)   return <PageError message={error.message} onRetry={refetch} />;
+  if (loading) return <LoadingState variant="cards" />;
+  if (error)   return <ErrorState message={error.message} onRetry={refetch} />;
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8">

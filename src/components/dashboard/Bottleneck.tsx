@@ -1,81 +1,25 @@
 "use client";
 
-type BottleneckStatus = "Alert" | "Warning" | "Good";
-
-interface DiagnosisResult {
-  issue: string;
-  status: BottleneckStatus;
-  message: string;
-  suggestion: string;
-}
+import type { BottleneckIssue } from "@/lib/bottleneck";
 
 interface BottleneckProps {
-  openRate: number;
-  replyRate: number;
-  validRate: number;
-  documentPassRate: number;
+  issues: BottleneckIssue[];
 }
 
-function diagnose(
-  openRate: number,
-  replyRate: number,
-  validRate: number,
-  documentPassRate: number
-): DiagnosisResult {
-  if (openRate < 40) {
-    return {
-      issue: "開封率が低い",
-      status: "Alert",
-      message: "スカウトメールが開封されていません。件名や送信タイミングに問題がある可能性があります。",
-      suggestion: "件名をパーソナライズし、候補者の経歴に合わせた訴求文に変更してください。",
-    };
-  }
-  if (replyRate < 15) {
-    return {
-      issue: "返信率が低い",
-      status: "Alert",
-      message: "開封はされているが返信につながっていません。本文の内容に改善余地があります。",
-      suggestion: "スカウト文面を見直し、ポジションの魅力や候補者へのメリットを明確に伝えてください。",
-    };
-  }
-  if (validRate < 50) {
-    return {
-      issue: "有効応募率が低い",
-      status: "Warning",
-      message: "返信はあるが有効応募に至らないケースが多いです。ターゲット精度に問題がある可能性があります。",
-      suggestion: "スカウト対象の条件を見直し、ポジションにマッチした候補者に絞り込んでください。",
-    };
-  }
-  if (documentPassRate < 30) {
-    return {
-      issue: "書類通過率が低い",
-      status: "Warning",
-      message: "応募は来ているが書類選考で多く落とされています。選考基準の見直しが必要かもしれません。",
-      suggestion: "書類選考の評価基準を明確化し、必須要件と歓迎要件を整理してください。",
-    };
-  }
-  return {
-    issue: "問題なし",
-    status: "Good",
-    message: "現在のファネルは健全な状態です。このまま継続してください。",
-    suggestion: "各指標を維持しつつ、送信数を増やしてスケールを目指しましょう。",
-  };
-}
-
-const statusStyles: Record<BottleneckStatus, { border: string; bg: string; badge: string; text: string }> = {
-  Alert: {
+const severityStyles: Record<string, { border: string; bg: string; badge: string; text: string }> = {
+  alert: {
     border: "border-red-300",
     bg: "bg-red-50",
     badge: "bg-red-100 text-red-700",
     text: "text-red-700",
   },
-  Warning: {
+  warning: {
     border: "border-yellow-300",
     bg: "bg-yellow-50",
     badge: "bg-yellow-100 text-yellow-700",
     text: "text-yellow-700",
   },
-  Good: {
+  good: {
     border: "border-green-300",
     bg: "bg-green-50",
     badge: "bg-green-100 text-green-700",
@@ -83,23 +27,46 @@ const statusStyles: Record<BottleneckStatus, { border: string; bg: string; badge
   },
 };
 
-export function Bottleneck({ openRate, replyRate, validRate, documentPassRate }: BottleneckProps) {
-  const result = diagnose(openRate, replyRate, validRate, documentPassRate);
-  const styles = statusStyles[result.status];
+export function Bottleneck({ issues }: BottleneckProps) {
+  const top = issues[0];
+  if (!top) return null;
+
+  const isGood = top.id === "問題なし";
+  const styles = severityStyles[isGood ? "good" : top.severity];
 
   return (
-    <div className={`rounded-xl border p-5 ${styles.border} ${styles.bg}`}>
-      <div className="flex items-center gap-3">
-        <span className={`rounded-full px-3 py-1 text-sm font-semibold ${styles.badge}`}>
-          {result.status}
-        </span>
-        <h3 className={`text-base font-bold ${styles.text}`}>{result.issue}</h3>
+    <div className="space-y-3">
+      <div className={`rounded-xl border p-5 ${styles.border} ${styles.bg}`}>
+        <div className="flex items-center gap-3">
+          <span className={`rounded-full px-3 py-1 text-sm font-semibold ${styles.badge}`}>
+            {isGood ? "Good" : top.severity === "alert" ? "Alert" : "Warning"}
+          </span>
+          <h3 className={`text-base font-bold ${styles.text}`}>{top.id}</h3>
+        </div>
+        <p className="mt-3 text-sm text-gray-700">{top.message}</p>
       </div>
-      <p className="mt-3 text-sm text-gray-700">{result.message}</p>
-      <div className="mt-3 rounded-lg bg-white/60 p-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">改善提案</p>
-        <p className="mt-1 text-sm text-gray-700">{result.suggestion}</p>
-      </div>
+
+      {issues.length > 1 && (
+        <div className="rounded-lg border border-gray-100 bg-white p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            他に該当した項目（優先度順）
+          </p>
+          <ul className="space-y-1.5">
+            {issues.slice(1).map((issue) => (
+              <li key={issue.id} className="flex items-start gap-2 text-xs text-gray-600">
+                <span
+                  className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    issue.severity === "alert" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {issue.severity === "alert" ? "Alert" : "Warning"}
+                </span>
+                <span>{issue.id}：{issue.message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

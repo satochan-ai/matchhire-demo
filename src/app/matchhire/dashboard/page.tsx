@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { KpiCards } from "@/components/dashboard/KpiCards";
+import { KpiCards, statusFromTarget, type KpiCardItem } from "@/components/dashboard/KpiCards";
 import { FunnelChart } from "@/components/dashboard/FunnelChart";
 import { Bottleneck } from "@/components/dashboard/Bottleneck";
 import { ChannelChart } from "@/components/dashboard/ChannelChart";
 import { DateFilter } from "@/components/dashboard/DateFilter";
 import { InsightPanel } from "@/components/dashboard/InsightPanel";
+import { LoadingState } from "@/components/common/LoadingState";
+import { ErrorState } from "@/components/common/ErrorState";
 import {
   computeDashboardMetrics,
   computeChannelMetrics,
@@ -14,8 +16,11 @@ import {
   buildDateRange,
   type DateRangeKey,
 } from "@/lib/mockData";
-import { generateInsights, type BottleneckIssue } from "@/lib/insightEngine";
+import { computeFunnelCounts, computeFunnelKpis, buildFunnelSteps } from "@/lib/funnel";
+import { diagnoseBottlenecks, BOTTLENECK_THRESHOLDS } from "@/lib/bottleneck";
+import { generateInsights } from "@/lib/insightEngine";
 import { useRawData } from "@/hooks/useRawData";
+import { EmptyState } from "@/components/common/EmptyState";
 
 /** mockData の基準日（ダミーデータが 2026-04 に集中しているため固定） */
 const BASE_DATE = "2026-04-25";
@@ -23,73 +28,6 @@ const BASE_DATE = "2026-04-25";
 function pct(numerator: number, denominator: number) {
   if (denominator === 0) return 0;
   return (numerator / denominator) * 100;
-}
-
-const actionsByBottleneck: Record<string, string[]> = {
-  "開封率が低い": [
-    "件名に候補者名や実績を含めてパーソナライズする",
-    "送信時間帯を火〜木の午前中に変更する",
-    "件名のA/Bテストを実施する",
-  ],
-  "返信率が低い": [
-    "スカウト文面の冒頭を候補者のキャリアへの共感から始める",
-    "ポジションの魅力・成長機会を具体的に記載する",
-    "CTA（返信を促す一文）を明確にする",
-  ],
-  "有効応募率が低い": [
-    "スカウト対象条件を現職年収・スキルで絞り込む",
-    "ポジション要件と候補者プロフィールのマッチ度を高める",
-    "ターゲットペルソナを再定義する",
-  ],
-  "書類通過率が低い": [
-    "書類選考の必須要件・歓迎要件を明文化する",
-    "評価シートをブラッシュアップする",
-    "面接評価基準を見直す",
-  ],
-  "問題なし": [
-    "送信数を増やしてスケールを目指す",
-    "チャネルごとのROIを分析して予算配分を最適化する",
-    "内定承諾後のオンボーディング体験を改善する",
-  ],
-};
-
-// ─────────────────────────────────────────
-// ローディング・エラー UI
-// ─────────────────────────────────────────
-
-function PageSkeleton() {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto max-w-7xl space-y-8 animate-pulse">
-        <div className="h-8 w-48 rounded bg-gray-200" />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-xl bg-gray-200" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="h-64 rounded-xl bg-gray-200" />
-          <div className="h-64 rounded-xl bg-gray-200" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-          <p className="font-semibold mb-1">データの取得に失敗しました</p>
-          <p className="text-red-500 mb-4 break-all">{message}</p>
-          <button onClick={onRetry} className="rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700 transition-colors">
-            再試行する
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ─────────────────────────────────────────
@@ -105,52 +43,77 @@ export default function DashboardPage() {
 
   const range = useMemo(() => buildDateRange(rangeKey, BASE_DATE), [rangeKey]);
 
+  // ── アプローチ指標（送信・開封・返信）：スカウト/DM 起点の従来指標 ──
   const dashData    = useMemo(() => computeDashboardMetrics(range, data),   [range, data]);
   const channelData = useMemo(() => computeChannelMetrics(range, data),     [range, data]);
-  const ngData      = useMemo(() => computeNgReasonMetrics(undefined, data), [data]);
+  const ngData       = useMemo(() => computeNgReasonMetrics(undefined, data), [data]);
 
-  const openRate         = pct(dashData.opened_count,            dashData.sent_count);
-  const replyRate        = pct(dashData.replied_count,           dashData.opened_count);
-  const validRate        = pct(dashData.valid_application_count, dashData.replied_count);
-  const interviewRate    = pct(dashData.interview_count,         dashData.valid_application_count);
-  const offerRate        = pct(dashData.offer_count,             dashData.interview_count);
-  const acceptRate       = pct(dashData.accept_count,            dashData.offer_count);
-  const documentPassRate = pct(dashData.interview_count,         dashData.valid_application_count);
+  const openRate  = pct(dashData.opened_count,  dashData.sent_count);
+  const replyRate = pct(dashData.replied_count, dashData.opened_count);
 
-  const funnelSteps = [
-    { label: "送信数",   count: dashData.sent_count },
-    { label: "開封数",   count: dashData.opened_count },
-    { label: "返信数",   count: dashData.replied_count },
-    { label: "有効応募", count: dashData.valid_application_count },
-    { label: "面接数",   count: dashData.interview_count },
-    { label: "内定数",   count: dashData.offer_count },
+  // ── 正式な採用ファネル（応募〜入社）：応募単位で重複排除して集計 ──
+  const rangedApplications = useMemo(() => {
+    const apps = data.applications ?? [];
+    if (range.key === "all") return apps;
+    return apps.filter((a) => (!range.start || a.appliedAt >= range.start) && (!range.end || a.appliedAt <= range.end));
+  }, [data.applications, range]);
+
+  const funnelCounts = useMemo(
+    () => computeFunnelCounts(rangedApplications, data.interviews ?? []),
+    [rangedApplications, data.interviews]
+  );
+  const funnelKpis  = useMemo(() => computeFunnelKpis(funnelCounts), [funnelCounts]);
+  const funnelSteps = useMemo(() => buildFunnelSteps(funnelCounts), [funnelCounts]);
+
+  const bottleneckIssues = useMemo(
+    () =>
+      diagnoseBottlenecks({
+        counts: funnelCounts,
+        kpis: funnelKpis,
+        applications: rangedApplications,
+        interviews: data.interviews ?? [],
+        evaluations: data.evaluations ?? [],
+        baseDate: BASE_DATE,
+      }),
+    [funnelCounts, funnelKpis, rangedApplications, data.interviews, data.evaluations]
+  );
+
+  const kpiItems: KpiCardItem[] = [
+    { label: "有効応募率", value: funnelKpis.validApplicationRate, isPercent: true, status: statusFromTarget(funnelKpis.validApplicationRate, BOTTLENECK_THRESHOLDS.validApplicationRate) },
+    { label: "書類通過率", value: funnelKpis.documentPassRate, isPercent: true, status: statusFromTarget(funnelKpis.documentPassRate, BOTTLENECK_THRESHOLDS.documentPassRate) },
+    { label: "一次面接化率", value: funnelKpis.firstInterviewRate, isPercent: true, status: statusFromTarget(funnelKpis.firstInterviewRate, BOTTLENECK_THRESHOLDS.firstInterviewRate) },
+    { label: "一次面接通過率", value: funnelKpis.firstInterviewPassRate, isPercent: true, status: statusFromTarget(funnelKpis.firstInterviewPassRate, BOTTLENECK_THRESHOLDS.firstInterviewPassRate) },
+    { label: "最終面接通過率", value: funnelKpis.finalInterviewPassRate, isPercent: true, status: statusFromTarget(funnelKpis.finalInterviewPassRate, BOTTLENECK_THRESHOLDS.finalInterviewPassRate) },
+    { label: "内定率", value: funnelKpis.offerRate, isPercent: true, status: "good" },
+    { label: "承諾率", value: funnelKpis.acceptRate, isPercent: true, status: statusFromTarget(funnelKpis.acceptRate, BOTTLENECK_THRESHOLDS.acceptRate) },
+    { label: "入社率", value: funnelKpis.joinRate, isPercent: true, status: statusFromTarget(funnelKpis.joinRate, BOTTLENECK_THRESHOLDS.joinRate) },
+    { label: "最終採用率", value: funnelKpis.finalHireRate, isPercent: true, status: "good" },
   ];
 
-  const bottleneckIssue = ((): BottleneckIssue => {
-    if (openRate < 40)         return "開封率が低い";
-    if (replyRate < 15)        return "返信率が低い";
-    if (validRate < 50)        return "有効応募率が低い";
-    if (documentPassRate < 30) return "書類通過率が低い";
-    return "問題なし";
-  })();
+  const approachItems: KpiCardItem[] = [
+    { label: "送信数", value: dashData.sent_count, isPercent: false, status: "good" },
+    { label: "開封率", value: openRate, isPercent: true, status: statusFromTarget(openRate, 40) },
+    { label: "返信率", value: replyRate, isPercent: true, status: statusFromTarget(replyRate, 15) },
+  ];
 
-  const actions = actionsByBottleneck[bottleneckIssue] ?? [];
-
+  // ── ⑥ AIインサイト：正式ファネルKPI（funnelKpis）とダッシュボードと同じ
+  //     ボトルネック診断結果（bottleneckIssues）を唯一の情報源として使用する。
+  //     ここでは有効応募率等の再計算を行わない。
   const insights = useMemo(
     () =>
       generateInsights(
-        { sentCount: dashData.sent_count, openRate, replyRate, validRate,
-          interviewRate, offerRate, acceptRate, documentPassRate },
-        bottleneckIssue,
+        { counts: funnelCounts, kpis: funnelKpis },
+        bottleneckIssues,
+        { sentCount: dashData.sent_count, openRate, replyRate },
         ngData
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dashData, openRate, replyRate, validRate, interviewRate, offerRate, acceptRate,
-     documentPassRate, bottleneckIssue, ngData]
+    [funnelCounts, funnelKpis, bottleneckIssues, dashData.sent_count, openRate, replyRate, ngData]
   );
 
-  if (loading) return <PageSkeleton />;
-  if (error)   return <PageError message={error.message} onRetry={refetch} />;
+  const hasApplications = funnelCounts.applied > 0;
+
+  if (loading) return <LoadingState variant="cards" />;
+  if (error)   return <ErrorState message={error.message} onRetry={refetch} />;
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 md:px-6 md:py-8">
@@ -161,7 +124,7 @@ export default function DashboardPage() {
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-gray-900 md:text-2xl">ダッシュボード</h1>
             <p className="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-800 md:text-base">
-              スカウト・DMから応募、面接、内定、入社までを一気通貫で可視化する採用プロセス改善ダッシュボードです。
+              応募から内定・承諾・入社までを一気通貫で可視化する採用プロセス改善ダッシュボードです。
             </p>
           </div>
           <div className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm sm:w-auto">
@@ -169,107 +132,50 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* このダッシュボードで分かること */}
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-1 text-sm font-semibold text-slate-700">このダッシュボードで分かること</h2>
-          <p className="mb-5 text-xs leading-relaxed text-slate-600">
-            スカウト・DMから応募、面接、内定、入社までの流れを見て、採用プロセスの改善ポイントを判断できます。
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[
-              {
-                icon: (
-                  <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                ),
-                title: "採用が順調かどうか",
-                desc:  "送信・開封・返信・有効応募・面接・内定の各KPIを数値とグラフで一覧確認できます。",
-              },
-              {
-                icon: (
-                  <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                  </svg>
-                ),
-                title: "どこで詰まっているか",
-                desc:  "ファネルの各ステップ間の転換率を比較し、歩留まりが低い箇所を自動で診断します。",
-              },
-              {
-                icon: (
-                  <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ),
-                title: "今やるべきアクション",
-                desc:  "ボトルネック診断の結果をもとに、今週取り組むべき具体的な改善アクションを提示します。",
-              },
-            ].map((item) => (
-              <div key={item.title} className="flex gap-3 rounded-lg bg-slate-50 p-4">
-                <div className="mt-0.5 shrink-0">{item.icon}</div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">{item.title}</p>
-                  <p className="mt-1 text-xs font-medium leading-relaxed text-slate-700">{item.desc}</p>
-                </div>
+        {/* 応募コホート方式の説明 */}
+        <p className="text-xs leading-relaxed text-slate-500">
+          ※ 選択期間内に応募された候補者が、その後どの選考段階まで到達したかを集計しています（応募日を基準にした「応募コホート」方式）。
+        </p>
+
+        {hasApplications ? (
+          <>
+            {/* ① KPIサマリー */}
+            <section>
+              <h2 className="mb-4 text-base font-semibold text-gray-700">① KPIサマリー（応募〜入社）</h2>
+              <KpiCards items={kpiItems} />
+            </section>
+
+            {/* ⑥ AIインサイト */}
+            <InsightPanel insights={insights} />
+
+            <div className="grid grid-cols-1 gap-5 md:gap-8 lg:grid-cols-2">
+              {/* ② ファネル表示 */}
+              <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+                <h2 className="mb-4 text-sm font-semibold text-gray-700 md:mb-5 md:text-base">② 採用ファネル</h2>
+                <FunnelChart steps={funnelSteps} />
+              </section>
+
+              {/* ③ ボトルネック診断 */}
+              <div className="space-y-4 md:space-y-5">
+                <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+                  <h2 className="mb-3 text-sm font-semibold text-gray-700 md:mb-4 md:text-base">③ ボトルネック診断</h2>
+                  <Bottleneck issues={bottleneckIssues} />
+                </section>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ① KPIサマリー */}
-        <section>
-          <h2 className="mb-4 text-base font-semibold text-gray-700">① KPIサマリー</h2>
-          <KpiCards
-            sentCount={dashData.sent_count}
-            openRate={openRate}
-            replyRate={replyRate}
-            validRate={validRate}
-            interviewRate={interviewRate}
-            offerRate={offerRate}
-            acceptRate={acceptRate}
-          />
-        </section>
-
-        {/* ⑥ AIインサイト */}
-        <InsightPanel insights={insights} />
-
-        <div className="grid grid-cols-1 gap-5 md:gap-8 lg:grid-cols-2">
-          {/* ② ファネル表示 */}
-          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-            <h2 className="mb-4 text-sm font-semibold text-gray-700 md:mb-5 md:text-base">② 採用ファネル</h2>
-            <FunnelChart steps={funnelSteps} />
+            </div>
+          </>
+        ) : (
+          <section>
+            <h2 className="mb-4 text-base font-semibold text-gray-700">① 採用ファネル・KPI・ボトルネック診断</h2>
+            <EmptyState message="この期間には分析対象となる応募データがありません。期間を変更して確認してください。" />
           </section>
+        )}
 
-          {/* ③④ ボトルネック診断 + アクション提案 */}
-          <div className="space-y-4 md:space-y-5">
-            <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-              <h2 className="mb-3 text-sm font-semibold text-gray-700 md:mb-4 md:text-base">③ ボトルネック診断</h2>
-              <Bottleneck
-                openRate={openRate}
-                replyRate={replyRate}
-                validRate={validRate}
-                documentPassRate={documentPassRate}
-              />
-            </section>
-
-            <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-              <h2 className="mb-3 text-sm font-semibold text-gray-700 md:mb-4 md:text-base">④ アクション提案</h2>
-              <ul className="space-y-2">
-                {actions.map((action, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
-                      {i + 1}
-                    </span>
-                    {action}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        </div>
+        {/* ④ アプローチ状況（スカウト・DM） */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <h2 className="mb-4 text-sm font-semibold text-gray-700 md:mb-5 md:text-base">④ アプローチ状況（スカウト・DM）</h2>
+          <KpiCards items={approachItems} />
+        </section>
 
         {/* ⑤ チャネル比較 */}
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">

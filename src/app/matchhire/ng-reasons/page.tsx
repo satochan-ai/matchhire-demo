@@ -6,37 +6,10 @@ import { NgReasonChart } from "@/components/ng/NgReasonChart";
 import { NgReasonTable } from "@/components/ng/NgReasonTable";
 import { computeNgReasonMetrics } from "@/lib/mockData";
 import { useRawData } from "@/hooks/useRawData";
+import { LoadingState } from "@/components/common/LoadingState";
+import { ErrorState } from "@/components/common/ErrorState";
 
 const DEFAULT_FILTERS: NgFilterState = { jobId: "", ownerId: "" };
-
-function PageSkeleton() {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8 animate-pulse">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <div className="h-8 w-56 rounded bg-gray-200" />
-        <div className="h-16 rounded-xl bg-gray-200" />
-        <div className="grid grid-cols-2 gap-6">
-          <div className="h-64 rounded-xl bg-gray-200" />
-          <div className="h-64 rounded-xl bg-gray-200" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PageError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
-          <p className="font-semibold mb-1">データの取得に失敗しました</p>
-          <p className="text-red-500 mb-4 break-all">{message}</p>
-          <button onClick={onRetry} className="rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700">再試行する</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function NgReasonsPage() {
   const { data, loading, error, refetch } = useRawData(["evaluations", "applications"]);
@@ -52,8 +25,8 @@ export default function NgReasonsPage() {
 
   const total = useMemo(() => ngData.reduce((sum, d) => sum + d.count, 0), [ngData]);
 
-  if (loading) return <PageSkeleton />;
-  if (error)   return <PageError message={error.message} onRetry={refetch} />;
+  if (loading) return <LoadingState variant="cards" />;
+  if (error)   return <ErrorState message={error.message} onRetry={refetch} />;
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8">

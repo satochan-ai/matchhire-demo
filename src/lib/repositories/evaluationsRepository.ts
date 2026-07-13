@@ -58,3 +58,30 @@ export async function fetchEvaluations(): Promise<Evaluation[]> {
   if (source === "csv")    return fetchFromEndpoint("/api/csv/evaluations");
   return fetchFromEndpoint("/api/sheets/evaluations");
 }
+
+/**
+ * 指定 interviewId に紐づく評価を1件選択する。
+ *
+ * 優先順位:
+ *   1. 更新日時フィールド（updatedAt 等）が存在する場合は最新を採用する
+ *      （現状の Evaluation 型にはそのようなフィールドが無いため未使用。
+ *       将来追加された場合はここで比較ロジックを拡張する）
+ *   2. 日時で判定できない場合は配列末尾（＝最後に追加されたレコード）を採用する
+ *   3. 重複が存在する場合は開発環境でのみ console.warn する（画面はクラッシュさせない）
+ */
+export function selectEvaluationForInterview(
+  evaluations: Evaluation[],
+  interviewId: string
+): Evaluation | undefined {
+  const matches = evaluations.filter((e) => e.interviewId === interviewId);
+  if (matches.length === 0) return undefined;
+
+  if (matches.length > 1 && process.env.NODE_ENV !== "production") {
+    console.warn(
+      `[evaluationsRepository] interviewId(${interviewId}) に対して評価が ${matches.length} 件重複しています。配列末尾（${matches[matches.length - 1].id}）を採用します。`,
+      matches.map((e) => e.id)
+    );
+  }
+
+  return matches[matches.length - 1];
+}

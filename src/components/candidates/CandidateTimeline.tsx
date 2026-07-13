@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
 export interface InterviewRecord {
+  id?: string;
   date: string;
   interviewer: string;
   result: "通過" | "不採用" | "保留" | "未確定";
@@ -60,6 +63,17 @@ export function CandidateTimeline({ interviews, contacts }: CandidateTimelinePro
                 </p>
                 {iv.comment && (
                   <p className="mt-1 text-sm text-gray-500 leading-relaxed">{iv.comment}</p>
+                )}
+                {iv.id && (
+                  <Link
+                    href={`/matchhire/interviews/${iv.id}/evaluation`}
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                  >
+                    面接評価を見る
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 )}
               </li>
             ))}

@@ -29,11 +29,14 @@ const optionColors: Record<CandidateStatus, string> = {
 interface CandidateStatusUpdateProps {
   currentStatus: CandidateStatus;
   onUpdate: (newStatus: CandidateStatus) => void;
+  /** true の場合、実際には保存されないデモ操作であることを明示する */
+  demoMode?: boolean;
 }
 
 export function CandidateStatusUpdate({
   currentStatus,
   onUpdate,
+  demoMode = false,
 }: CandidateStatusUpdateProps) {
   const [selected, setSelected] = useState<CandidateStatus>(currentStatus);
   const [saved, setSaved] = useState(false);
@@ -50,7 +53,14 @@ export function CandidateStatusUpdate({
 
   return (
     <div className="mt-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
-      <p className="mb-2 text-xs font-medium text-gray-400">ステータスを変更</p>
+      <div className="mb-2 flex items-center gap-2">
+        <p className="text-xs font-medium text-gray-400">ステータスを変更</p>
+        {demoMode && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+            デモ表示（保存されません）
+          </span>
+        )}
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={selected}
@@ -77,7 +87,7 @@ export function CandidateStatusUpdate({
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
           }`}
         >
-          更新する
+          {demoMode ? "更新する（デモ）" : "更新する"}
         </button>
 
         {saved && (
@@ -85,7 +95,7 @@ export function CandidateStatusUpdate({
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            更新しました
+            {demoMode ? "画面表示のみ更新しました（未保存）" : "更新しました"}
           </span>
         )}
       </div>

@@ -47,6 +47,7 @@ export function CandidateDetail({ data }: CandidateDetailProps) {
             application={data.application}
             currentStatus={currentStatus}
             onStatusUpdate={setCurrentStatus}
+            demoMode
           />
 
           {/* 右：面接履歴 + 接触履歴 */}

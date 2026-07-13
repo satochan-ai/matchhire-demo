@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { RawData } from "@/lib/mockData";
+import { warnReferentialIntegrity } from "@/lib/dataIntegrity";
 import { useCsvAutoReload } from "@/hooks/useCsvAutoReload";
 import { fetchCandidates }   from "@/lib/repositories/candidatesRepository";
 import { fetchJobs }         from "@/lib/repositories/jobsRepository";
@@ -70,6 +71,7 @@ export function useRawData(tables: TableName[]): UseRawDataResult {
         results.forEach(([table, rows]) => {
           (next as Record<string, unknown>)[table] = rows;
         });
+        warnReferentialIntegrity(next);
         setData(next);
       })
       .catch((err: unknown) => {

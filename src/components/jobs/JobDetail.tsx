@@ -1,4 +1,5 @@
 import type { Job, Application, Candidate, Interview } from "@/lib/mockData";
+import { computeFunnelCounts, computeFunnelKpis, buildFunnelSteps } from "@/lib/funnel";
 import { JobSummaryCard } from "./JobSummaryCard";
 import { JobFunnelCard } from "./JobFunnelCard";
 import { JobApplicationTable, type ApplicationRow } from "./JobApplicationTable";
@@ -10,9 +11,8 @@ interface Props {
   interviews: Interview[];
 }
 
-function pct(num: number, den: number): string {
-  if (den === 0) return "—";
-  return `${Math.round((num / den) * 100)}%`;
+function fmtPct(value: number): string {
+  return `${Math.round(value)}%`;
 }
 
 interface KpiItem {
@@ -22,30 +22,23 @@ interface KpiItem {
 }
 
 export function JobDetail({ job, applications, candidates, interviews }: Props) {
-  const appIds = new Set(applications.map((a) => a.id));
+  // ダッシュボードと同じ共通ファネルロジックへ、この求人に紐づく応募と
+  // その応募IDに紐づく面接だけを渡す（呼び出し元の jobs/[id]/page.tsx で
+  // すでに job 単位に絞り込み済み）。
+  const counts = computeFunnelCounts(applications, interviews);
+  const kpis = computeFunnelKpis(counts);
+  const funnelSteps = buildFunnelSteps(counts);
 
-  const applicationCount      = applications.length;
-  const validApplicationCount = applications.filter((a) => a.validity === "有効").length;
-  const interviewCount        = interviews.filter((i) => appIds.has(i.applicationId)).length;
-  const offerCount            = applications.filter(
-    (a) => a.status === "内定" || a.status === "承諾" || a.status === "入社"
-  ).length;
-
-  const kpis: KpiItem[] = [
-    { label: "応募数",       value: applicationCount },
-    { label: "有効応募数",   value: validApplicationCount },
-    { label: "面接数",       value: interviewCount },
-    { label: "内定数",       value: offerCount },
-    { label: "有効応募率",   value: pct(validApplicationCount, applicationCount),  sub: "応募→有効" },
-    { label: "面接化率",     value: pct(interviewCount,        validApplicationCount), sub: "有効→面接" },
-    { label: "内定率",       value: pct(offerCount,            interviewCount),     sub: "面接→内定" },
-  ];
-
-  const funnelSteps = [
-    { label: "応募",     count: applicationCount },
-    { label: "有効応募", count: validApplicationCount },
-    { label: "面接",     count: interviewCount },
-    { label: "内定",     count: offerCount },
+  // 表示領域の都合上、8段階すべてはカードに出さず主要な数値・率のみ抜粋する
+  // （ファネルの計算自体はダッシュボードと共通のため定義は一致する）。
+  const kpiItems: KpiItem[] = [
+    { label: "応募数", value: counts.applied },
+    { label: "有効応募数", value: counts.validApplication },
+    { label: "一次面接実施数", value: counts.firstInterviewDone },
+    { label: "内定数", value: counts.offered },
+    { label: "有効応募率", value: fmtPct(kpis.validApplicationRate), sub: "応募→有効応募" },
+    { label: "一次面接化率", value: fmtPct(kpis.firstInterviewRate), sub: "書類通過→一次面接" },
+    { label: "内定率", value: fmtPct(kpis.offerRate), sub: "有効応募→内定" },
   ];
 
   const rows: ApplicationRow[] = applications
@@ -67,7 +60,7 @@ export function JobDetail({ job, applications, candidates, interviews }: Props) 
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-base font-semibold text-gray-700">求人別 KPI</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            {kpis.map((kpi) => (
+            {kpiItems.map((kpi) => (
               <div key={kpi.label} className="rounded-lg bg-gray-50 p-3">
                 <p className="text-xs font-medium text-gray-400">{kpi.label}</p>
                 {kpi.sub && <p className="text-[10px] text-gray-300">{kpi.sub}</p>}
@@ -77,7 +70,7 @@ export function JobDetail({ job, applications, candidates, interviews }: Props) 
           </div>
         </section>
 
-        {/* ファネル */}
+        {/* ファネル（ダッシュボードと同じ8段階） */}
         <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-base font-semibold text-gray-700">採用ファネル</h2>
           <JobFunnelCard steps={funnelSteps} />
