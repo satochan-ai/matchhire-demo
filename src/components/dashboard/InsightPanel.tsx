@@ -60,22 +60,21 @@ function InsightItem({ insight }: { insight: Insight }) {
 
 export function InsightPanel({ insights }: InsightPanelProps) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-      {/* ヘッダー */}
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-lg">🤖</span>
-        <h2 className="text-base font-semibold text-gray-700">AIインサイト</h2>
-        <span className="ml-auto rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500">
-          ルールベース自動生成
+    <section className="rounded-xl border border-gray-100 bg-slate-50/60 p-4 md:p-5">
+      {/* ヘッダー：ボトルネック診断より視覚的に下位の補足情報として控えめに表示 */}
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500">採用インサイト</h2>
+        <span className="ml-auto rounded-full bg-white px-2.5 py-0.5 text-[10px] text-gray-400 border border-gray-200">
+          ルールベース自動生成・補足情報
         </span>
       </div>
 
       {insights.length === 0 ? (
-        <p className="text-sm text-gray-400">
+        <p className="text-xs text-gray-400">
           この期間のデータが不足しているため、インサイトを生成できません。
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {insights.map((insight) => (
             <InsightItem key={insight.id} insight={insight} />
           ))}
