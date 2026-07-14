@@ -3,6 +3,8 @@
 import type { ApplicationRoute } from "@/components/applications/ApplicationRouteBadge";
 import type { ApplicationValidity } from "@/components/applications/ApplicationValidityBadge";
 import type { CandidateStatus } from "@/components/candidates/CandidateStatusBadge";
+import { SearchField } from "@/components/common/SearchField";
+import { FilterBar } from "@/components/common/FilterBar";
 
 export interface ApplicationFilterState {
   search: string;
@@ -10,6 +12,13 @@ export interface ApplicationFilterState {
   validity: ApplicationValidity | "all";
   status: CandidateStatus | "all";
 }
+
+export const DEFAULT_APPLICATION_FILTERS: ApplicationFilterState = {
+  search: "",
+  route: "all",
+  validity: "all",
+  status: "all",
+};
 
 interface ApplicationFiltersProps {
   filters: ApplicationFilterState;
@@ -42,64 +51,80 @@ const statusOptions: { value: CandidateStatus | "all"; label: string }[] = [
   { value: "辞退",   label: "辞退" },
 ];
 
+function selectClass(active: boolean) {
+  return `h-10 rounded-lg border px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 ${
+    active ? "border-blue-300 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700"
+  }`;
+}
+
 export function ApplicationFilters({ filters, onChange }: ApplicationFiltersProps) {
   const set = <K extends keyof ApplicationFilterState>(
     key: K,
     value: ApplicationFilterState[K]
   ) => onChange({ ...filters, [key]: value });
 
+  const isDefault =
+    filters.search.trim() === "" &&
+    filters.route === DEFAULT_APPLICATION_FILTERS.route &&
+    filters.validity === DEFAULT_APPLICATION_FILTERS.validity &&
+    filters.status === DEFAULT_APPLICATION_FILTERS.status;
+
   return (
-    <div className="flex flex-wrap gap-3">
-      {/* 検索 */}
-      <div className="relative min-w-[220px] flex-1">
-        <svg
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+    <FilterBar>
+      <SearchField
+        value={filters.search}
+        onChange={(v) => set("search", v)}
+        placeholder="候補者名・求人名で検索"
+        aria-label="候補者名・求人名で検索"
+      />
+
+      <div className="grid grid-cols-2 gap-2 md:contents">
+        {/* 応募経路 */}
+        <select
+          value={filters.route}
+          onChange={(e) => set("route", e.target.value as ApplicationRoute | "all")}
+          className={selectClass(filters.route !== "all")}
+          aria-label="応募経路"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-        </svg>
-        <input
-          type="text"
-          placeholder="候補者名・求人名で検索"
-          value={filters.search}
-          onChange={(e) => set("search", e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-        />
+          {routeOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+
+        {/* 有効応募 */}
+        <select
+          value={filters.validity}
+          onChange={(e) => set("validity", e.target.value as ApplicationValidity | "all")}
+          className={selectClass(filters.validity !== "all")}
+          aria-label="有効応募"
+        >
+          {validityOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+
+        {/* ステータス */}
+        <select
+          value={filters.status}
+          onChange={(e) => set("status", e.target.value as CandidateStatus | "all")}
+          className={`col-span-2 md:col-auto ${selectClass(filters.status !== "all")}`}
+          aria-label="応募ステータス"
+        >
+          {statusOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
       </div>
 
-      {/* 応募経路 */}
-      <select
-        value={filters.route}
-        onChange={(e) => set("route", e.target.value as ApplicationRoute | "all")}
-        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-      >
-        {routeOptions.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-
-      {/* 有効応募 */}
-      <select
-        value={filters.validity}
-        onChange={(e) => set("validity", e.target.value as ApplicationValidity | "all")}
-        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-      >
-        {validityOptions.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-
-      {/* ステータス */}
-      <select
-        value={filters.status}
-        onChange={(e) => set("status", e.target.value as CandidateStatus | "all")}
-        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-      >
-        {statusOptions.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-    </div>
+      {!isDefault && (
+        <button
+          type="button"
+          onClick={() => onChange(DEFAULT_APPLICATION_FILTERS)}
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white px-4 text-xs font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 md:ml-auto md:w-auto"
+        >
+          条件をリセット
+        </button>
+      )}
+    </FilterBar>
   );
 }
