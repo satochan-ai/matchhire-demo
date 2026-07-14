@@ -35,23 +35,23 @@ const CHIP_LABEL: Record<KpiStatus, string> = {
 export function KpiDetail({ groups }: KpiDetailProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-baseline gap-2 border-b border-gray-100 px-5 py-3">
+      <div className="flex items-baseline gap-2 border-b border-gray-100 px-5 py-2">
         <h3 className="text-sm font-bold text-gray-800">KPI詳細</h3>
         <span className="ml-auto text-xs text-gray-400">全9項目</span>
       </div>
       {groups.map((group) => (
         <div key={group.groupLabel} className="border-t border-gray-100 first:border-t-0">
-          <div className="border-b border-gray-100 bg-slate-50 px-5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+          <div className="border-b border-gray-100 bg-slate-50 px-5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
             {group.groupLabel}
           </div>
           {group.rows.map((row) => (
             <div
               key={row.label}
-              className="flex items-center gap-3 border-b border-gray-100 px-5 py-2.5 text-sm last:border-b-0"
+              className="flex items-center gap-3 border-b border-gray-100 px-5 py-1.5 text-sm last:border-b-0"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-gray-700">{row.label}</p>
-                {row.formula && <p className="truncate text-[10.5px] text-gray-400">{row.formula}</p>}
+                <p className="truncate leading-tight text-gray-700">{row.label}</p>
+                {row.formula && <p className="truncate text-[10.5px] leading-tight text-gray-400">{row.formula}</p>}
               </div>
               <span className="min-w-[64px] shrink-0 text-right text-base font-extrabold tabular text-gray-900">
                 {row.isPercent ? `${row.value.toFixed(1)}%` : row.value.toLocaleString()}
