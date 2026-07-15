@@ -12,7 +12,7 @@ export interface ApplicationRow {
 const CHANNEL_LABEL: Record<string, string> = {
   scout:  "スカウト",
   dm:     "DM",
-  direct: "直接応募",
+  direct: "ダイレクト",
 };
 
 interface Props {
