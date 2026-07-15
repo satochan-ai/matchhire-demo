@@ -38,14 +38,16 @@ export default async function JobDetailPage({ params }: Props) {
     <div className="min-h-screen bg-gray-50 px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-6">
 
-        {/* パンくず */}
-        <nav className="flex items-center gap-2 text-sm text-gray-400">
-          <Link href="/matchhire/jobs" className="hover:text-blue-600 hover:underline">
-            求人管理
-          </Link>
-          <span>/</span>
-          <span className="text-gray-700 font-medium">{job.title}</span>
-        </nav>
+        {/* 戻る導線 */}
+        <Link
+          href="/matchhire/jobs"
+          className="inline-flex items-center gap-1 rounded text-sm text-gray-400 transition-colors hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          求人一覧へ戻る
+        </Link>
 
         <JobDetail
           job={job}
