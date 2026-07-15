@@ -42,7 +42,7 @@ export function CandidateTimeline({ interviews, contacts }: CandidateTimelinePro
     <div className="space-y-4">
       {/* ③ 面接履歴 */}
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">③ 面接履歴</h2>
+        <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">面接履歴</h2>
         {interviews.length === 0 ? (
           <p className="text-sm text-gray-400">面接履歴はありません</p>
         ) : (
@@ -83,7 +83,7 @@ export function CandidateTimeline({ interviews, contacts }: CandidateTimelinePro
 
       {/* ④ 接触履歴 */}
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">④ 接触履歴</h2>
+        <h2 className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-wide">接触履歴</h2>
         {contacts.length === 0 ? (
           <p className="text-sm text-gray-400">接触履歴はありません</p>
         ) : (

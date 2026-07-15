@@ -48,6 +48,21 @@ export default async function CandidateDetailPage({
   const primaryApp = candidateApps[0];
   const primaryJob = primaryApp ? jobs.find((j) => j.id === primaryApp.jobId) : undefined;
 
+  // 応募履歴一覧（既存joinと同じ方法で求人名を解決する）
+  const applicationRows: CandidateDetailData["applications"] = candidateApps.map((app) => {
+    const job = jobs.find((j) => j.id === app.jobId);
+    return {
+      id:            app.id,
+      jobId:         app.jobId,
+      jobTitle:      job?.title ?? "不明な求人",
+      status:        app.status,
+      validity:      app.validity,
+      invalidReason: app.invalidReason,
+      channel:       app.channel,
+      appliedAt:     app.appliedAt,
+    };
+  });
+
   const application: CandidateDetailData["application"] = primaryApp
     ? {
         appliedAt:      primaryApp.appliedAt,
@@ -87,16 +102,18 @@ export default async function CandidateDetailPage({
 
   const data: CandidateDetailData = {
     basic: {
-      name:    candidate.name,
-      skills:  candidate.skills,
-      bio:     candidate.bio,
-      channel: candidate.channel,
-      status:  candidate.status,
-      valid:   candidate.valid,
+      name:      candidate.name,
+      skills:    candidate.skills,
+      bio:       candidate.bio,
+      channel:   candidate.channel,
+      status:    candidate.status,
+      valid:     candidate.valid,
+      updatedAt: candidate.updatedAt,
     },
     application,
-    interviews: candidateInterviews,
-    contacts:   candidateContacts,
+    applications: applicationRows,
+    interviews:   candidateInterviews,
+    contacts:     candidateContacts,
   };
 
   return <CandidateDetail data={data} />;
