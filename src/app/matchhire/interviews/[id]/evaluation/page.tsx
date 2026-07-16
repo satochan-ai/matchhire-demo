@@ -56,47 +56,80 @@ export default async function EvaluationPage({
   const stage = application?.interviewStage || "面接";
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="min-h-screen bg-slate-50 px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-6xl space-y-5 md:space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
+        {/* ═════ 戻る導線 ═════ */}
+        {candidate ? (
           <Link
-            href="/matchhire/candidates"
-            className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            href={`/matchhire/candidates/${candidate.id}`}
+            className="inline-flex items-center gap-1 rounded text-sm text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            候補者一覧
+            候補者詳細へ戻る
           </Link>
-          <span className="text-gray-300">/</span>
-          {candidate ? (
+        ) : (
+          <div className="flex items-center gap-3">
             <Link
-              href={`/matchhire/candidates/${candidate.id}`}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              href="/matchhire/candidates"
+              className="flex items-center gap-1 rounded text-sm text-slate-400 transition-colors hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             >
-              {candidateName}
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              候補者一覧
             </Link>
-          ) : (
-            <span className="text-sm text-gray-400">{candidateName}</span>
-          )}
-          <span className="text-gray-300">/</span>
-          <h1 className="text-xl font-bold text-gray-900">面接評価入力</h1>
-        </div>
-
-        {/* サブタイトル */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600">
-            <span><span className="font-medium text-gray-400">候補者：</span>{candidateName}</span>
-            <span><span className="font-medium text-gray-400">求人：</span>{jobTitle}</span>
-            <span><span className="font-medium text-gray-400">ステージ：</span>{stage}</span>
-            <span><span className="font-medium text-gray-400">面接日：</span>{interview.date}</span>
-            <span><span className="font-medium text-gray-400">面接官：</span>{interview.interviewer}</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-sm text-slate-400">{candidateName}</span>
           </div>
+        )}
+
+        {/* ═════ ページヘッダー ═════ */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">面接評価入力</h1>
+          <p className="mt-1 text-sm text-slate-500">面接結果と評価コメントを記録します</p>
         </div>
 
-        {/* フォーム本体 */}
+        {/* ═════ 面接サマリー ═════ */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <dt className="text-xs font-medium text-slate-400">候補者</dt>
+              <dd className="mt-0.5 break-words text-sm font-semibold text-slate-800">
+                {candidate ? (
+                  <Link
+                    href={`/matchhire/candidates/${candidate.id}`}
+                    className="rounded text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  >
+                    {candidateName}
+                  </Link>
+                ) : (
+                  candidateName
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-slate-400">求人</dt>
+              <dd className="mt-0.5 break-words text-sm font-semibold text-slate-800">{jobTitle}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-slate-400">面接ステージ</dt>
+              <dd className="mt-0.5 break-words text-sm font-semibold text-slate-800">{stage}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-slate-400">面接日</dt>
+              <dd className="mt-0.5 tabular-nums text-sm font-semibold text-slate-800">{interview.date}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium text-slate-400">面接官</dt>
+              <dd className="mt-0.5 break-words text-sm font-semibold text-slate-800">{interview.interviewer}</dd>
+            </div>
+          </dl>
+        </section>
+
+        {/* ═════ 評価フォーム＋ライブプレビュー＋デモ保存操作 ═════ */}
         <EvaluationForm
           candidateName={candidateName}
           jobTitle={jobTitle}
