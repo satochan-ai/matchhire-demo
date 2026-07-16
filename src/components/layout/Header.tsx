@@ -59,33 +59,31 @@ export function Header() {
 
   return (
     <>
-      {/* ───── メインヘッダー ───── */}
-      <header className="flex h-14 shrink-0 items-center border-b border-slate-200 bg-white px-4 gap-2 shadow-sm md:px-6 md:gap-3">
+      {/* ───── メインヘッダー（薄型） ───── */}
+      <header className="flex h-12 shrink-0 items-center border-b border-slate-200 bg-white px-4 gap-2 md:px-5">
         {/* モバイル：MatchHireロゴを表示（サイドバーが隠れるため） */}
         <span className="text-sm font-bold tracking-wide text-slate-800 md:hidden">
           Match<span className="text-blue-500">Hire</span>
         </span>
-        <span className="hidden text-slate-300 md:block select-none">|</span>
 
-        {/* 現在ページ名 */}
-        <h1 className="text-sm font-semibold text-slate-800 truncate">{title}</h1>
-        <span className="text-slate-300 select-none">|</span>
+        {/* 現在ページ名 + 補助説明 */}
+        <h1 className="text-[13px] font-semibold text-slate-800 truncate">{title}</h1>
         <span className="hidden text-xs text-slate-400 sm:block">
-          スカウトから入社までを見える化
+          応募から入社までの採用ファネルを一気通貫で可視化
         </span>
 
         {/* 右側：データモードバッジ + ユーザーアイコン */}
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <DataModeBadge />
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-600">
             M
           </span>
         </div>
       </header>
 
       {/* ───── モバイル専用ナビ（md以上は非表示） ───── */}
-      <nav className="md:hidden overflow-x-auto border-b border-slate-100 bg-white px-3 scrollbar-hide">
-        <ul className="flex gap-1 py-2">
+      <nav className="md:hidden overflow-x-auto border-b border-slate-200 bg-white px-3 scrollbar-hide">
+        <ul className="flex gap-1.5 py-2">
           {MOBILE_NAV.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
@@ -93,10 +91,10 @@ export function Header() {
               <li key={item.href} className="shrink-0">
                 <Link
                   href={item.href}
-                  className={`inline-block rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                  className={`inline-flex min-h-[30px] items-center rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
                     isActive
                       ? "bg-blue-600 text-white"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800"
                   }`}
                 >
                   {item.label}

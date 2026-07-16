@@ -63,61 +63,85 @@ function XCircleIcon() {
   );
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: "ダッシュボード", href: "/matchhire/dashboard",    icon: <DashboardIcon /> },
-  { label: "候補者管理",     href: "/matchhire/candidates",   icon: <UsersIcon /> },
-  { label: "応募管理",       href: "/matchhire/applications", icon: <FileIcon /> },
-  { label: "担当者分析",     href: "/matchhire/owners",       icon: <ChartIcon /> },
-  { label: "求人管理",       href: "/matchhire/jobs",         icon: <BriefcaseIcon /> },
-  { label: "NG理由分析",     href: "/matchhire/ng-reasons",   icon: <XCircleIcon /> },
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "全体を見る",
+    items: [
+      { label: "ダッシュボード", href: "/matchhire/dashboard", icon: <DashboardIcon /> },
+    ],
+  },
+  {
+    label: "選考を進める",
+    items: [
+      { label: "候補者管理", href: "/matchhire/candidates",   icon: <UsersIcon /> },
+      { label: "応募管理",   href: "/matchhire/applications", icon: <FileIcon /> },
+      { label: "求人管理",   href: "/matchhire/jobs",         icon: <BriefcaseIcon /> },
+    ],
+  },
+  {
+    label: "分析する",
+    items: [
+      { label: "担当者分析", href: "/matchhire/owners",     icon: <ChartIcon /> },
+      { label: "NG理由分析", href: "/matchhire/ng-reasons", icon: <XCircleIcon /> },
+    ],
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex h-full w-56 shrink-0 flex-col bg-slate-900">
+    <aside className="hidden md:flex h-full w-56 shrink-0 flex-col bg-[#0f1b33]">
       {/* ロゴ */}
-      <div className="border-b border-slate-800 px-5 py-4">
+      <div className="border-b border-white/10 px-5 py-4">
         <div className="mb-1 flex items-center gap-0">
           <span className="text-xl font-bold tracking-wide text-white">Match</span>
           <span className="text-xl font-bold tracking-wide text-blue-400">Hire</span>
         </div>
-        <p className="mt-2 text-sm font-medium leading-relaxed text-slate-200 tracking-wide">採用ファネル分析ツール</p>
+        <p className="mt-2 text-[11px] font-medium leading-relaxed text-slate-400 tracking-wide">採用マネジメント・コックピット</p>
       </div>
 
       {/* ナビ */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-0.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-slate-800 text-white"
-                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
-                  }`}
-                >
-                  <span className={isActive ? "text-blue-400" : "text-slate-500"}>
-                    {item.icon}
-                  </span>
-                  {item.label}
-                  {isActive && (
-                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="mb-4 last:mb-0">
+            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {group.label}
+            </p>
+            <ul className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive =
+                  pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "border-blue-400 bg-[#1e2e52] text-white"
+                          : "border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-100"
+                      }`}
+                    >
+                      <span className={isActive ? "text-blue-400" : "text-slate-500"}>
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* フッター */}
-      <div className="border-t border-slate-800 px-5 py-3 space-y-1">
+      <div className="border-t border-white/10 px-5 py-3 space-y-1">
         <p className="text-xs text-slate-500">v0.1.0 · MatchHire</p>
         <p className="text-[10px] leading-relaxed text-slate-600">
           © 2026 MatchHire. All rights reserved.

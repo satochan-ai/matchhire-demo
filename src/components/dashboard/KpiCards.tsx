@@ -7,6 +7,8 @@ export interface KpiCardItem {
   value: number;
   isPercent: boolean;
   status: KpiStatus;
+  /** 分母0など、数値をそのまま表示すべきでない場合の表示専用の上書き文字列（例: "—"） */
+  displayOverride?: string;
 }
 
 interface KpiCardsProps {
@@ -43,7 +45,7 @@ export function KpiCards({ items }: KpiCardsProps) {
           >
             <p className="text-xs font-medium text-gray-500">{item.label}</p>
             <p className="mt-1.5 text-xl font-bold text-gray-800 md:mt-2 md:text-2xl">
-              {item.isPercent ? `${item.value.toFixed(1)}%` : item.value.toLocaleString()}
+              {item.displayOverride ?? (item.isPercent ? `${item.value.toFixed(1)}%` : item.value.toLocaleString())}
             </p>
             <span className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium md:mt-2 ${styles.badge}`}>
               {styles.label}

@@ -16,7 +16,7 @@ export function NotFoundState({ title, message, backHref, backLabel }: NotFoundS
           <p className="mt-2 text-sm text-gray-500">{message}</p>
           <Link
             href={backHref}
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
           >
             {backLabel}
           </Link>
