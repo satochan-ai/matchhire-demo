@@ -2,11 +2,11 @@
 
 // --- スコアバッジ（1〜5）---
 const scoreColors: Record<number, string> = {
-  1: "bg-red-100 text-red-600",
-  2: "bg-orange-100 text-orange-600",
-  3: "bg-yellow-100 text-yellow-700",
-  4: "bg-blue-100 text-blue-700",
-  5: "bg-green-100 text-green-700",
+  1: "bg-red-50 text-red-600",
+  2: "bg-orange-50 text-orange-600",
+  3: "bg-amber-50 text-amber-700",
+  4: "bg-blue-50 text-blue-700",
+  5: "bg-emerald-50 text-emerald-700",
 };
 
 export function EvaluationScoreBadge({ score }: { score: number | null }) {
@@ -26,10 +26,10 @@ export function EvaluationScoreBadge({ score }: { score: number | null }) {
 
 // --- 総合評価バッジ（A/B/C/D）---
 const gradeColors: Record<string, string> = {
-  A: "bg-green-100 text-green-700",
-  B: "bg-blue-100 text-blue-700",
-  C: "bg-yellow-100 text-yellow-700",
-  D: "bg-red-100 text-red-600",
+  A: "bg-emerald-50 text-emerald-700",
+  B: "bg-blue-50 text-blue-700",
+  C: "bg-amber-50 text-amber-700",
+  D: "bg-red-50 text-red-600",
 };
 
 export function EvaluationGradeBadge({ grade }: { grade: string | null }) {
@@ -49,9 +49,9 @@ export function EvaluationGradeBadge({ grade }: { grade: string | null }) {
 
 // --- 結果バッジ（通過/不採用/保留）---
 const resultColors: Record<string, string> = {
-  通過: "bg-green-100 text-green-700",
-  不採用: "bg-red-100 text-red-600",
-  保留: "bg-yellow-100 text-yellow-700",
+  通過: "bg-emerald-50 text-emerald-700",
+  不採用: "bg-red-50 text-red-600",
+  保留: "bg-amber-50 text-amber-700",
 };
 
 export function EvaluationResultBadge({ result }: { result: string | null }) {

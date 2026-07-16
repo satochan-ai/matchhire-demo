@@ -38,7 +38,7 @@ interface EvaluationFormProps {
   saveDisabled?: boolean;
 }
 
-// --- スコア選択（1〜5ラジオ）---
+// --- スコア選択（1〜5ボタン群） ---
 function ScoreSelector({
   label,
   value,
@@ -49,29 +49,33 @@ function ScoreSelector({
   onChange: (v: number) => void;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+    <fieldset>
+      <legend className="mb-1.5 text-sm font-medium text-gray-700">{label}</legend>
       <div className="flex gap-2">
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button
-            key={n}
-            type="button"
-            onClick={() => onChange(n)}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-all ${
-              value === n
-                ? "border-blue-500 bg-blue-500 text-white shadow-sm"
-                : "border-gray-200 bg-white text-gray-500 hover:border-blue-300 hover:text-blue-500"
-            }`}
-          >
-            {n}
-          </button>
-        ))}
+        {[1, 2, 3, 4, 5].map((n) => {
+          const selected = value === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange(n)}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 ${
+                selected
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600"
+              }`}
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
-// --- 選択ボタングループ ---
+// --- 選択ボタングループ（総合評価／結果／NG理由で共用） ---
 function ButtonGroup<T extends string>({
   label,
   options,
@@ -86,36 +90,42 @@ function ButtonGroup<T extends string>({
   colorMap: Record<string, string>;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+    <fieldset>
+      <legend className="mb-1.5 text-sm font-medium text-gray-700">{label}</legend>
       <div className="flex flex-wrap gap-2">
-        {options.map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onChange(opt)}
-            className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition-all ${
-              value === opt
-                ? colorMap[opt] ?? "border-blue-500 bg-blue-500 text-white"
-                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
-            }`}
-          >
-            {opt}
-          </button>
-        ))}
+        {options.map((opt) => {
+          const selected = value === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange(opt)}
+              className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 ${
+                selected
+                  ? colorMap[opt] ?? "border-blue-600 bg-blue-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+              }`}
+            >
+              {opt}
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
 // --- テキストエリア ---
 function TextArea({
+  id,
   label,
   value,
   onChange,
   placeholder,
   rows = 3,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -124,13 +134,16 @@ function TextArea({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-gray-700">
+        {label}
+      </label>
       <textarea
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+        className="w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus-visible:ring-2"
       />
     </div>
   );
@@ -151,30 +164,32 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
     setTimeout(() => setSaved(false), 3000);
   };
 
+  // 総合評価：4段階とも同一トーン（blue系）に統一し、A〜Dの信号色による優劣表現を避ける
   const gradeColors: Record<string, string> = {
-    A: "border-green-500 bg-green-500 text-white",
-    B: "border-blue-500 bg-blue-500 text-white",
-    C: "border-yellow-500 bg-yellow-500 text-white",
-    D: "border-red-500 bg-red-500 text-white",
+    A: "border-blue-600 bg-blue-600 text-white",
+    B: "border-blue-600 bg-blue-600 text-white",
+    C: "border-blue-600 bg-blue-600 text-white",
+    D: "border-blue-600 bg-blue-600 text-white",
   };
 
+  // 結果：意味の区別は残しつつ、全面塗りつぶしの強い彩度は避ける
   const resultColors: Record<string, string> = {
-    通過: "border-green-500 bg-green-500 text-white",
-    不採用: "border-red-500 bg-red-500 text-white",
-    保留: "border-yellow-500 bg-yellow-500 text-white",
+    通過: "border-emerald-600 bg-emerald-50 text-emerald-700",
+    不採用: "border-red-400 bg-red-50 text-red-700",
+    保留: "border-amber-400 bg-amber-50 text-amber-700",
   };
 
+  // NG理由：選択時のみ控えめなredで統一（強い赤の全面塗りつぶしは避ける）
   const ngReasonColors: Record<string, string> = {};
-  NG_REASONS.forEach((r) => { ngReasonColors[r] = "border-red-400 bg-red-400 text-white"; });
+  NG_REASONS.forEach((r) => { ngReasonColors[r] = "border-red-300 bg-red-50 text-red-700"; });
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(300px,2fr)] lg:items-start">
       {/* 左：入力フォーム */}
       <div className="space-y-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-400">
-            評価スコア
-          </h2>
+        {/* A. 評価スコア */}
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <h2 className="mb-5 text-sm font-bold text-gray-800">評価スコア</h2>
           <div className="space-y-5">
             <ScoreSelector
               label="技術評価"
@@ -198,6 +213,13 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
               onChange={(v) => set("overallGrade", v)}
               colorMap={gradeColors}
             />
+          </div>
+        </div>
+
+        {/* B. 面接結果 */}
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <h2 className="mb-5 text-sm font-bold text-gray-800">面接結果</h2>
+          <div className="space-y-5">
             <ButtonGroup
               label="結果"
               options={["通過", "不採用", "保留"] as const}
@@ -220,18 +242,22 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        {/* C. コメント */}
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+          <h2 className="mb-5 text-sm font-bold text-gray-800">
             コメント
+            <span className="ml-2 text-xs font-normal text-slate-400">すべて任意項目です</span>
           </h2>
           <div className="space-y-4">
             <TextArea
+              id="concerns"
               label="懸念点"
               value={values.concerns}
               onChange={(v) => set("concerns", v)}
               placeholder="気になる点・リスクを入力"
             />
             <TextArea
+              id="comment"
               label="評価コメント"
               value={values.comment}
               onChange={(v) => set("comment", v)}
@@ -239,6 +265,7 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
               rows={4}
             />
             <TextArea
+              id="nextAction"
               label="次回アクション"
               value={values.nextAction}
               onChange={(v) => set("nextAction", v)}
@@ -247,7 +274,7 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
           </div>
         </div>
 
-        {/* 保存ボタン */}
+        {/* デモ保存操作 */}
         <div className="space-y-2">
           {saveDisabled && (
             <p className="text-xs font-medium text-amber-600">
@@ -258,13 +285,13 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
             <button
               type="button"
               onClick={handleSave}
-              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:scale-95 transition-all"
+              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             >
               {saveDisabled ? "デモ保存" : "保存する"}
             </button>
             {saved && (
               <span className="flex items-center gap-1.5 text-sm font-medium text-green-600">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {saveDisabled ? "画面表示のみ更新しました（未保存）" : "保存しました"}
@@ -274,7 +301,7 @@ export function EvaluationForm({ candidateName, jobTitle, stage, initialValues, 
         </div>
       </div>
 
-      {/* 右：プレビュー */}
+      {/* 右：ライブプレビュー */}
       <div className="lg:sticky lg:top-6 lg:self-start">
         <EvaluationPreview
           values={values}

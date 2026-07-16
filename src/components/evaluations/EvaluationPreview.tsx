@@ -17,8 +17,8 @@ interface EvaluationPreviewProps {
 function PreviewRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-3 border-b border-gray-100 py-2.5 last:border-0">
-      <span className="w-32 shrink-0 text-xs font-medium text-gray-400 pt-0.5">{label}</span>
-      <div className="flex-1 text-sm text-gray-700">{children}</div>
+      <span className="w-32 shrink-0 pt-0.5 text-xs font-medium text-gray-400">{label}</span>
+      <div className="min-w-0 flex-1 break-words text-sm text-gray-700">{children}</div>
     </div>
   );
 }
@@ -32,20 +32,16 @@ export function EvaluationPreview({
   return (
     <div className="space-y-4">
       {/* 面接情報 */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          面接情報
-        </h2>
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        <h2 className="mb-3 text-sm font-bold text-gray-800">面接情報</h2>
         <PreviewRow label="候補者">{candidateName}</PreviewRow>
         <PreviewRow label="求人">{jobTitle}</PreviewRow>
         <PreviewRow label="面接ステージ">{stage}</PreviewRow>
       </div>
 
       {/* スコアプレビュー */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          スコアプレビュー
-        </h2>
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        <h2 className="mb-3 text-sm font-bold text-gray-800">スコアプレビュー</h2>
         <PreviewRow label="技術評価">
           <EvaluationScoreBadge score={values.technicalScore} />
         </PreviewRow>
@@ -75,10 +71,8 @@ export function EvaluationPreview({
       </div>
 
       {/* コメントプレビュー */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          コメントプレビュー
-        </h2>
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        <h2 className="mb-3 text-sm font-bold text-gray-800">コメントプレビュー</h2>
         <PreviewRow label="懸念点">
           {values.concerns ? (
             <span className="leading-relaxed">{values.concerns}</span>
