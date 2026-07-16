@@ -53,7 +53,7 @@ export function CandidateTimeline({ interviews, contacts }: CandidateTimelinePro
                   <TimelineDot color="bg-purple-400" />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-gray-400">{iv.date}</span>
+                  <span className="text-xs font-medium tabular-nums text-gray-400">{iv.date}</span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${interviewResultStyles[iv.result]}`}>
                     {iv.result}
                   </span>
@@ -94,7 +94,7 @@ export function CandidateTimeline({ interviews, contacts }: CandidateTimelinePro
                   <TimelineDot color="bg-blue-400" />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-gray-400">{ct.date}</span>
+                  <span className="text-xs font-medium tabular-nums text-gray-400">{ct.date}</span>
                   <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                     {channelLabel[ct.channel]}
                   </span>

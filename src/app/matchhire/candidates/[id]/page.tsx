@@ -36,7 +36,7 @@ export default async function CandidateDetailPage({
         title="候補者が見つかりません"
         message={`ID「${id}」に該当する候補者は存在しません。削除されたか、URLが正しくない可能性があります。`}
         backHref="/matchhire/candidates"
-        backLabel="候補者一覧に戻る"
+        backLabel="候補者一覧へ戻る"
       />
     );
   }
