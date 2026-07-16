@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { ApplicationRouteBadge } from "@/components/applications/ApplicationRouteBadge";
-import { ApplicationValidityBadge } from "@/components/applications/ApplicationValidityBadge";
-import { CandidateStatusBadge } from "@/components/candidates/CandidateStatusBadge";
+import { CandidateStatusBadge, ValidStatusBadge } from "@/components/candidates/CandidateStatusBadge";
 import { DataTableShell } from "@/components/common/DataTableShell";
 import { MobileListCard } from "@/components/common/MobileListCard";
 import type { ApplicationRow as Application } from "@/app/matchhire/applications/page";
@@ -45,7 +44,7 @@ export function ApplicationTable({ applications }: ApplicationTableProps) {
                   <CandidateStatusBadge status={app.status} />
                 </td>
                 <td className="whitespace-nowrap px-5 py-3">
-                  <ApplicationValidityBadge validity={app.validity} />
+                  <ValidStatusBadge status={app.validity} />
                 </td>
                 <td className="px-5 py-3 text-xs text-slate-400">
                   {app.invalidReason ?? <span className="text-slate-200">—</span>}
@@ -81,7 +80,7 @@ export function ApplicationTable({ applications }: ApplicationTableProps) {
             </div>
             <p className="mt-1 truncate text-xs text-slate-500" title={app.jobTitle}>{app.jobTitle}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <ApplicationValidityBadge validity={app.validity} />
+              <ValidStatusBadge status={app.validity} />
               {app.invalidReason && (
                 <span className="text-[11px] font-medium text-red-500">{app.invalidReason}</span>
               )}

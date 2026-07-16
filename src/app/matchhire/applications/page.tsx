@@ -8,8 +8,7 @@ import {
   type ApplicationFilterState,
 } from "@/components/applications/ApplicationFilters";
 import type { ApplicationRoute } from "@/components/applications/ApplicationRouteBadge";
-import type { ApplicationValidity } from "@/components/applications/ApplicationValidityBadge";
-import type { CandidateStatus } from "@/components/candidates/CandidateStatusBadge";
+import type { CandidateStatus, ValidStatus } from "@/components/candidates/CandidateStatusBadge";
 import { useRawData } from "@/hooks/useRawData";
 import { ListPageHeader } from "@/components/common/ListPageHeader";
 import { ListEmptyState } from "@/components/common/ListEmptyState";
@@ -25,7 +24,7 @@ export interface ApplicationRow {
   candidateName: string;
   jobTitle: string;
   route: ApplicationRoute;
-  validity: ApplicationValidity;
+  validity: ValidStatus;
   invalidReason: string | null;
   status: CandidateStatus;
 }

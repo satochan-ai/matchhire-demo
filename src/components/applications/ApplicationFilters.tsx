@@ -1,15 +1,14 @@
 "use client";
 
 import type { ApplicationRoute } from "@/components/applications/ApplicationRouteBadge";
-import type { ApplicationValidity } from "@/components/applications/ApplicationValidityBadge";
-import type { CandidateStatus } from "@/components/candidates/CandidateStatusBadge";
+import type { CandidateStatus, ValidStatus } from "@/components/candidates/CandidateStatusBadge";
 import { SearchField } from "@/components/common/SearchField";
 import { FilterBar } from "@/components/common/FilterBar";
 
 export interface ApplicationFilterState {
   search: string;
   route: ApplicationRoute | "all";
-  validity: ApplicationValidity | "all";
+  validity: ValidStatus | "all";
   status: CandidateStatus | "all";
 }
 
@@ -32,7 +31,7 @@ const routeOptions: { value: ApplicationRoute | "all"; label: string }[] = [
   { value: "direct", label: "ダイレクト" },
 ];
 
-const validityOptions: { value: ApplicationValidity | "all"; label: string }[] = [
+const validityOptions: { value: ValidStatus | "all"; label: string }[] = [
   { value: "all",  label: "すべての有効応募" },
   { value: "有効",  label: "有効" },
   { value: "無効",  label: "無効" },
@@ -94,7 +93,7 @@ export function ApplicationFilters({ filters, onChange }: ApplicationFiltersProp
         {/* 有効応募 */}
         <select
           value={filters.validity}
-          onChange={(e) => set("validity", e.target.value as ApplicationValidity | "all")}
+          onChange={(e) => set("validity", e.target.value as ValidStatus | "all")}
           className={selectClass(filters.validity !== "all")}
           aria-label="有効応募"
         >
