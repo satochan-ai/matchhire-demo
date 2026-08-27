@@ -1,71 +1,71 @@
-# MatchHire Project Instructions
+# MatchHire Project指示
 
-## Product Boundary
+## Productの境界
 
-MatchHire is a recruiting-support demo application for viewing candidates, jobs, applications, interviews, evaluations, recruiting funnels, and KPIs. It also provides owner analysis, rejection-reason analysis, bottleneck detection, and rule-based recruiting insights.
+MatchHireは、candidate、job、application、interview、evaluation、採用funnel、KPIを確認するための採用支援demo applicationである。owner analysis、rejection-reason analysis、bottleneck detection、rule-based recruiting insightも提供する。
 
-Keep MatchHire responsibilities separate from MatchPilot Dashboard, CRM, AI Matching, and other products. A visible screen or documented future plan does not imply production readiness.
+MatchHireの責務をMatchPilot Dashboard、CRM、AI Matching、その他の製品から分離すること。表示される画面や文書化された将来計画は、Production readyであることを意味しない。
 
-The repository must not be treated as having production authentication, complete authorization, a secure applicant portal, ATS integrations, external recruiting-platform integrations, a production candidate database, or an actual AI API unless the implementation is explicitly verified.
+実装を明示的に確認しない限り、このrepositoryにProduction authentication、完全なauthorization、安全な応募者portal、ATS integration、外部recruiting platform integration、Production candidate database、実際のAI APIがあると扱わないこと。
 
-## Recruiting Semantics
+## 採用業務の意味
 
-- Preserve the existing recruiting funnel and use the current types and calculation code as the source of truth for status names and meanings.
-- Keep the distinction between scout/DM contact, opened, replied, application, valid application, document screening, interview, offer, acceptance, and joining.
-- When changing application status, inspect impacts on candidate, job, application, funnel, KPI, and analytics views. Do not merge or rename statuses for visual convenience.
-- Treat final hiring decisions as human decisions. Dashboard metrics and insights are supporting information, not automatic pass, reject, hire, offer, personality, or suitability decisions.
+- 既存のrecruiting funnelを維持し、status名と意味のsource of truthとしてcurrent typesとcalculation codeを使うこと。
+- scout/DM contact、opened、replied、application、valid application、document screening、interview、offer、acceptance、joiningを区別すること。
+- application statusを変更する場合は、candidate、job、application、funnel、KPI、analytics viewへの影響を確認すること。見た目の都合でstatusを統合・改名しないこと。
+- 最終的な採用判断は人間が行うものとして扱うこと。Dashboard metricとinsightは補助情報であり、pass、reject、hire、offer、personality、suitabilityを自動決定するものではない。
 
-## KPI and Rule-Based Insights
+## KPIとrule-based insight
 
-Before changing a KPI or funnel calculation, confirm its source data, period, aggregation unit, numerator, denominator, status mapping, and funnel stage. Do not confuse applications, valid applications, screening passes, interviews, offers, acceptances, and joins.
+KPIまたはfunnel計算を変更する前に、source data、period、aggregation unit、numerator、denominator、status mapping、funnel stageを確認すること。application、valid application、screening pass、interview、offer、acceptance、joinを混同しないこと。
 
-`funnel.ts`, `bottleneck.ts`, and `insightEngine.ts` contain rule-based calculations and insights. Do not describe their output as an AI prediction, hiring probability, personality judgment, guaranteed recommendation, or LLM result. Do not add inferred traits or decisions that are not supported by stored data.
+`funnel.ts`、`bottleneck.ts`、`insightEngine.ts`にはrule-based calculationとinsightがある。その出力をAI prediction、hiring probability、personality judgment、guaranteed recommendation、LLM resultとして説明しないこと。保存dataに根拠のない推測された特性や判断を追加しないこと。
 
-## Evaluation and Personal Data
+## Evaluationと個人情報
 
-Preserve the meaning and linkage of technical, communication, alignment/orientation, overall evaluation, pass/reject/hold, concerns, rejection reasons, comments, and next actions. Do not invent candidate traits, motivation, personality, ability, or cultural fit from incomplete data.
+technical、communication、alignment/orientation、overall evaluation、pass/reject/hold、concerns、rejection reasons、comments、next actionsの意味と関連を維持すること。不完全なdataからcandidateの特性、motivation、personality、ability、cultural fitを作り出さないこと。
 
-Candidate and interview data may contain personal or sensitive information. Do not copy real names, email addresses, phone numbers, addresses, resumes, career histories, salary or desired conditions, interview notes, evaluations, rejection reasons, or hiring outcomes into source code, fixtures, screenshots, logs, documentation, or sample CSV files. Do not add age, gender, nationality, health, family, beliefs, or other sensitive attributes to hiring logic unless explicitly required and separately reviewed.
+candidateとinterview dataには個人情報やsensitive informationが含まれる場合がある。実名、email address、phone number、住所、resume、career history、給与や希望条件、interview note、evaluation、rejection reason、hiring outcomeをsource code、fixture、screenshot、log、documentation、sample CSVへコピーしないこと。明示的な要件と別途reviewがない限り、年齢、性別、国籍、健康、家族、信条等のsensitive attributeをhiring logicへ追加しないこと。
 
-Do not print interview notes, evaluation comments, concerns, or rejection reasons in bulk debug output.
+interview note、evaluation comment、concern、rejection reasonをbulk debug outputへ出力しないこと。
 
-## Data Sources and Repository Boundaries
+## Data sourceとrepositoryの境界
 
-The supported data-source modes are distinct:
+対応するdata-source modeは別物である。
 
 - `mock`: demo data such as `src/lib/mockData.ts`.
 - `csv`: files under `data/` accessed through the CSV repository/API.
 - `sheets`: Google Apps Script and Google Sheets accessed through the Sheets repository/API.
 
-Do not treat these modes as interchangeable sources of truth. Preserve the separation between repositories, normalization, business logic, and UI rendering. Prefer extending `src/lib/repositories/` rather than putting source-specific access in components.
+これらのmodeを交換可能なsource of truthとして扱わないこと。repository、normalization、business logic、UI renderingの分離を維持すること。source-specific accessをcomponentに置くより、`src/lib/repositories/`の拡張を優先すること。
 
-When changing CSV schemas or columns, check existing data, parsers, repositories, UI, documentation, and Google Sheets mappings. Do not rename columns for presentation alone, and do not copy real candidate data into sample files.
+CSV schemaやcolumnを変更する場合は、既存data、parser、repository、UI、documentation、Google Sheets mappingを確認すること。表示だけを理由にcolumnを改名せず、実candidate dataをsample fileへコピーしないこと。
 
 For Sheets/GAS integration, preserve the allowed-table whitelist and server-side handling of `SHEETS_API_URL` and `SHEETS_API_KEY`. Never place keys or environment values in client code, source files, or committed documentation. Do not broaden arbitrary table access without explicit review.
 
-## Authentication and Runtime Boundaries
+## Authenticationとruntimeの境界
 
 Do not assume that the current repository provides login, sessions, role-based access, recruiter authorization, interviewer authorization, or secure internal-only access. Any move toward real candidate data requires a separate authentication, authorization, privacy, and security review.
 
 Keep normal Next.js server execution distinct from the GitHub Pages static export. Check compatibility when changing Route Handlers, server-only code, data access, or environment handling.
 
-## GitHub Pages and Deployment Safety
+## GitHub Pagesとdeploymentの安全
 
 The GitHub Pages workflow can deploy when changes reach `main`. Treat a push or merge to `main` as a possible public release, not merely Git storage. Do not merge to `main`, push to `main`, change deployment settings, or alter the workflow unless explicitly requested.
 
-## UI and Accessibility
+## UIとaccessibility
 
 Preserve the meaning and relationships of candidate, job, application, interview, evaluation, funnel, dashboard, and analytics screens. UI improvements must not change status meanings, score semantics, or funnel stages.
 
 Maintain existing accessibility and responsive behavior, including keyboard navigation, labels, headings, contrast, and usable layouts across mobile, tablet, and desktop. Check table overflow where relevant.
 
-## Documentation and Current Implementation
+## Documentationとcurrent implementation
 
 Use the current implementation, types, and repository behavior when documentation and code differ. Do not silently change behavior to match stale documentation; report the discrepancy and update documentation only when the requested change makes it materially inaccurate.
 
 Treat future features described in README or docs—such as actual AI, production authentication, ATS integration, secure portals, or automated hiring decisions—as proposals until implemented and verified.
 
-## Validation
+## validation
 
 Choose validation appropriate to the change:
 
@@ -77,7 +77,7 @@ Choose validation appropriate to the change:
 
 Use available project scripts such as lint or build when appropriate. Do not assume a test or typecheck script exists, and do not report checks that were not run. For repository changes, use `git diff --check` where applicable.
 
-## Scope and Completion Report
+## 範囲と完了報告
 
 Make the smallest change that satisfies the request. Do not perform unrelated refactoring, broad cleanup, or dependency additions. Preserve existing user changes and never use destructive Git operations without explicit instruction.
 
