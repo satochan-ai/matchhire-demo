@@ -196,7 +196,8 @@
 
 ## 17. Git の運用安全とコミット履歴の保護
 
-- **現在のブランチ状態**: `feature/matchhire-readme-update`（既存コミット `ahead 2` を維持）。
+- **作業前確認**: Git操作を行う前に、現在の branch / HEAD / status / ahead・behind を確認すること。現在の ahead・behind 数や一時的な branch 状態を、本ルールファイルへ固定値として記録しないこと。
+- **既存作業の保護**: 既存の未push commitや未コミット変更が存在する場合、それをユーザー作業として保護し、無断で書き換え・破棄しないこと。
 - **破壊的操作の禁止**: 勝手な `git reset`、`git rebase`、`git commit --amend`、`git stash`、`checkout` 等で既存のコミット履歴や作業を破壊しないこと。
 - **`main` ブランチおよび GitHub Pages デプロイの特別扱い**:
   - `main` への push / merge は GitHub Pages の本番公開リリースに直結する。
